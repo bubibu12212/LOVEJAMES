@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
-import { profile } from '../data'
+import { profile, stations } from '../data'
 import About3D from './About3D'
 import TokyoHero from './TokyoHero'
 import { IsoBuilding, TowerArt } from './Illustrations'
@@ -72,40 +72,6 @@ export function Hero() {
   )
 }
 
-export function About() {
-  return (
-    <section className="about" id="about">
-      <div className="grid-lines" aria-hidden><i /><i /><i /></div>
-      <div className="about-visual">
-        <div className="sun" aria-hidden />
-        {profile.useAbout3D ? (
-          <About3D />
-        ) : (
-          <div className="portrait">
-            {profile.photo ? <img src={profile.photo} alt={profile.name} onError={(e) => { e.currentTarget.style.display = 'none' }} /> : null}
-            <span className="portrait-fallback mono">Add your photo at<br />public/photo.jpg</span>
-          </div>
-        )}
-        <p className="caption mono">{profile.name} · 写真</p>
-      </div>
-      <div className="about-text">
-        <Eyebrow no="02" en="About me" jp="私について" />
-        <h2 className="display">{profile.aboutTitle}</h2>
-        {profile.about.map((p, i) => <p key={i} className="lead">{p}</p>)}
-        <dl className="facts">
-          {profile.facts.map((f) => (
-            <div key={f.label}><dt className="mono">{f.label}</dt><dd>{f.value}</dd></div>
-          ))}
-        </dl>
-        <p className="mono label">Skills · スキル</p>
-        <ul className="chips">
-          {profile.skills.map((s) => <li key={s}>{s}</li>)}
-        </ul>
-      </div>
-    </section>
-  )
-}
-
 // tambah class "in" sekali saat elemen mulai terlihat (untuk animasi muncul)
 function useReveal(threshold = 0.2) {
   const ref = useRef()
@@ -118,6 +84,84 @@ function useReveal(threshold = 0.2) {
     return () => io.disconnect()
   }, [threshold])
   return [ref, shown]
+}
+
+// keterangan saat chip skill diklik: dipakai di project mana saja
+function SkillNote({ skill }) {
+  const k = skill.toLowerCase()
+  const used = stations.filter((p) => [...p.tech, ...(p.tools ?? [])].some((t) => t.toLowerCase() === k))
+  if (!used.length) return <>{skill} — part of my everyday toolkit.</>
+  return <>{skill} → used in {used.length} project{used.length > 1 ? 's' : ''}: {used.map((p) => p.title).join(', ')}</>
+}
+
+export function About() {
+  const [ref, shown] = useReveal(0.2)
+  const visual = useRef()
+  const [picked, setPicked] = useState(null)
+  // foto miring mengikuti mouse (efek 3D), matahari bergerak berlawanan
+  const onMove = (e) => {
+    const r = visual.current.getBoundingClientRect()
+    visual.current.style.setProperty('--rx', ((e.clientX - r.left) / r.width - 0.5).toFixed(3))
+    visual.current.style.setProperty('--ry', ((e.clientY - r.top) / r.height - 0.5).toFixed(3))
+  }
+  const onLeave = () => {
+    visual.current.style.setProperty('--rx', 0)
+    visual.current.style.setProperty('--ry', 0)
+  }
+  const words = profile.aboutTitle.split(' ')
+  const ring = `${profile.role.replace('—', '·')} · `.toUpperCase()
+  return (
+    <section className={`about ${shown ? 'in' : ''}`} id="about" ref={ref}>
+      <div className="grid-lines" aria-hidden><i /><i /><i /></div>
+      <div className="about-visual" ref={visual} onMouseMove={onMove} onMouseLeave={onLeave}>
+        <div className="sun" aria-hidden />
+        {profile.useAbout3D ? (
+          <About3D />
+        ) : (
+          <div className="portrait">
+            {profile.photo ? <img src={profile.photo} alt={profile.name} onError={(e) => { e.currentTarget.style.display = 'none' }} /> : null}
+            <span className="portrait-fallback mono">Add your photo at<br />public/photo.jpg</span>
+            <span className="glare" aria-hidden />
+          </div>
+        )}
+        {/* lencana teks melingkar yang berputar */}
+        <svg className="badge" viewBox="0 0 200 200" aria-hidden>
+          <defs><path id="ring" d="M100,100 m-74,0 a74,74 0 1,1 148,0 a74,74 0 1,1 -148,0" /></defs>
+          <circle cx="100" cy="100" r="96" />
+          <text><textPath href="#ring" textLength="462" lengthAdjust="spacing">{ring}</textPath></text>
+          <text x="100" y="114" textAnchor="middle" className="badge-jp">私</text>
+        </svg>
+        <p className="caption mono">{profile.name} · 写真</p>
+      </div>
+      <div className="about-text">
+        <div className="rv" style={{ '--d': '0s' }}><Eyebrow no="02" en="About me" jp="私について" /></div>
+        <h2 className="display about-title">
+          {words.map((w, i) => (
+            <Fragment key={i}>
+              <span className="word"><span style={{ '--d': `${0.05 + i * 0.07}s` }}>{w}</span></span>{' '}
+            </Fragment>
+          ))}
+        </h2>
+        {profile.about.map((p, i) => <p key={i} className="lead rv" style={{ '--d': '0.4s' }}>{p}</p>)}
+        <dl className="facts">
+          {profile.facts.map((f, i) => (
+            <div key={f.label} className="rv" style={{ '--d': `${0.5 + i * 0.1}s` }}><dt className="mono">{f.label}</dt><dd>{f.value}</dd></div>
+          ))}
+        </dl>
+        <p className="mono label rv" style={{ '--d': '0.7s' }}>Skills · スキル <span className="hint">— tap one</span></p>
+        <ul className="chips">
+          {profile.skills.map((s, i) => (
+            <li key={s} style={{ '--d': `${0.75 + i * 0.05}s` }}>
+              <button className={picked === s ? 'on' : ''} onClick={() => setPicked(picked === s ? null : s)}>{s}</button>
+            </li>
+          ))}
+        </ul>
+        <p className={`chip-note mono ${picked ? 'show' : ''}`} aria-live="polite">
+          {picked && <SkillNote skill={picked} />}
+        </p>
+      </div>
+    </section>
+  )
 }
 
 function ContactItem({ c, i }) {

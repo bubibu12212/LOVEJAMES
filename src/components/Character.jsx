@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGLTF, useAnimations, useKeyboardControls } from '@react-three/drei'
 import * as THREE from 'three'
-import { obstacles, camState } from '../world'
+import { camState, PLAYER_START } from '../world'
 
 const SPEED = 3.2
 const RUN_SPEED = 6
@@ -38,8 +38,8 @@ function hipY(scene, sockName) {
   return sock.position.y + sock.geometry.boundingBox.max.y * sock.scale.y
 }
 
-export default function Character({ playerRef, stage }) {
-  const enabled = stage === 'explore'
+// bounds = {minX, maxX, minZ, maxZ} area boleh jalan, obstacles = lingkaran tabrakan dunia aktif
+export default function Character({ playerRef, enabled, bounds, obstacles }) {
   const { scene, animations } = useGLTF('/models/icafixed.glb')
   const model = useRef()
   const limbs = useRef(null)
@@ -103,10 +103,10 @@ export default function Character({ playerRef, stage }) {
       // arah jalan mengikuti arah kamera
       dir.normalize().applyAxisAngle(UP, camState.yaw)
       g.position.addScaledVector(dir, (running ? RUN_SPEED : SPEED) * dt)
-      g.position.x = THREE.MathUtils.clamp(g.position.x, -13.5, 13.5)
-      g.position.z = THREE.MathUtils.clamp(g.position.z, -38, 3.5)
+      g.position.x = THREE.MathUtils.clamp(g.position.x, bounds.minX, bounds.maxX)
+      g.position.z = THREE.MathUtils.clamp(g.position.z, bounds.minZ, bounds.maxZ)
 
-      // tabrakan sama pohon, rumah, tembok, pilar
+      // tabrakan dengan lampu, pot, tembok, pilar, bangku
       for (const o of obstacles) {
         const dx = g.position.x - o.x
         const dz = g.position.z - o.z
@@ -118,8 +118,6 @@ export default function Character({ playerRef, stage }) {
         }
       }
       target = Math.atan2(dir.x, dir.z) + MODEL_FACING
-    } else if (stage === 'opening') {
-      target = Math.PI + MODEL_FACING // berbalik menghadap gerbang
     }
 
     if (target !== null) {
@@ -149,7 +147,7 @@ export default function Character({ playerRef, stage }) {
   })
 
   return (
-    <group ref={playerRef} position={[0, 0, 2.5]}>
+    <group ref={playerRef} position={PLAYER_START}>
       <group ref={model} scale={MODEL_SCALE}>
         <primitive object={scene} />
       </group>

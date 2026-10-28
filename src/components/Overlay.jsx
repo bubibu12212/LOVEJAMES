@@ -1,89 +1,67 @@
 import { useEffect, useState } from 'react'
 import { useProgress } from '@react-three/drei'
-import { profile, storyIntro, exploreHint, storyEnding, stations } from '../data'
+import { profile } from '../data'
+import { photoSrc } from '../world'
 
 function Loader() {
   const { progress, active } = useProgress()
-  const [gone, setGone] = useState(false)
   const done = !active && progress >= 100
-  useEffect(() => {
-    if (!done) return
-    const t = setTimeout(() => setGone(true), 700)
-    return () => clearTimeout(t)
-  }, [done])
-  if (gone) return null
   return (
     <div className={`loader ${done ? 'is-done' : ''}`}>
-      <p className="kicker">Menyiapkan berkas</p>
+      <p className="eyebrow">Membangun kota</p>
       <div className="loader-bar"><span style={{ width: `${progress}%` }} /></div>
       <p className="loader-num">{Math.round(progress)}%</p>
     </div>
   )
 }
 
-function Intro({ setStage }) {
-  const [step, setStep] = useState(0)
-  const last = step === storyIntro.length - 1
-  const slide = storyIntro[step]
-
+function Lightbox({ photo, onClose }) {
+  useEffect(() => {
+    const key = (e) => { if (e.key === 'Escape') { e.stopImmediatePropagation(); onClose() } }
+    window.addEventListener('keydown', key, true)
+    return () => window.removeEventListener('keydown', key, true)
+  }, [onClose])
   return (
-    <div className="intro">
-      <header className="intro-head">
-        <p className="kicker">Portfolio Interaktif</p>
-        <h1>{profile.name}</h1>
-        <p className="role">{profile.role}</p>
-      </header>
-
-      <div className="story-card glass" key={step}>
-        <p className="kicker accent">{slide.kicker}</p>
-        <p className="story-text">{slide.text}</p>
-        <div className="story-foot">
-          <div className="dots">
-            {storyIntro.map((_, i) => <span key={i} className={i === step ? 'on' : ''} />)}
-          </div>
-          <div className="story-actions">
-            {!last && <button className="btn ghost" onClick={() => setStage('opening')}>Lewati</button>}
-            {last
-              ? <button className="btn primary" onClick={() => setStage('opening')}>Buka Gerbang</button>
-              : <button className="btn primary" onClick={() => setStep(step + 1)}>Lanjut</button>}
-          </div>
-        </div>
-      </div>
+    <div className="lightbox" onClick={onClose}>
+      <figure onClick={(e) => e.stopPropagation()}>
+        <img src={photoSrc(photo)} alt={photo.caption} />
+        <figcaption>{photo.caption}</figcaption>
+      </figure>
+      <button className="btn ghost lightbox-close" onClick={onClose}>Tutup</button>
     </div>
   )
 }
 
-export default function Overlay({ stage, setStage, active, visited }) {
-  const [endingClosed, setEndingClosed] = useState(false)
-  const total = stations.length
-  const solved = visited.length
-  const allDone = solved >= total
-  const contacts = profile.contacts.filter((c) => c.href && c.href !== '#')
+// teks di atas gerbang selama mode scroll (opacity diatur lewat CSS var --p)
+export function ScrollIntro() {
+  return (
+    <div className="gate-intro">
+      <p className="eyebrow">Projects</p>
+      <h2>Selamat datang di kotaku.</h2>
+      <p>Setiap gedung menyimpan satu project atau pengalaman.</p>
+      <div className="scroll-hint"><span />Scroll untuk membuka gerbang</div>
+    </div>
+  )
+}
+
+export default function Overlay({ mode, world, active, photo, fade, onExit }) {
+  const [zoomed, setZoomed] = useState(null)
 
   return (
     <div className="ui">
       <Loader />
+      <div className={`fade ${fade ? 'on' : ''}`} />
 
-      {stage === 'intro' && <Intro setStage={setStage} />}
+      {mode === 'scroll' && <ScrollIntro />}
 
-      {stage === 'explore' && (
+      {mode === 'explore' && (
         <>
           <div className="hud-brand glass">
             <strong>{profile.name}</strong>
-            <span>{profile.role}</span>
+            <span>{world === 'room' ? 'Galeri Kegiatan' : 'Kota Project'}</span>
           </div>
 
-          <div className="hud-progress glass">
-            <span className="kicker">Kasus terpecahkan</span>
-            <div className="progress-row">
-              <b>{solved}/{total}</b>
-              <div className="case-dots">
-                {stations.map((s) => <span key={s.id} className={visited.includes(s.id) ? 'on' : ''} />)}
-              </div>
-            </div>
-          </div>
-
-          <div className={`toast glass ${active ? 'is-hidden' : ''}`}>{exploreHint}</div>
+          <button className="btn ghost hud-exit glass" onClick={onExit}>Keluar <kbd>Esc</kbd></button>
 
           <div className="hud-keys glass">
             <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> jalan</span>
@@ -92,27 +70,29 @@ export default function Overlay({ stage, setStage, active, visited }) {
             <span><kbd>Scroll</kbd> zoom</span>
           </div>
 
-          {active?.link && (
+          {world === 'city' && !active && (
+            <div className="toast glass">Berdiri di lingkaran depan gedung untuk melihat project. Gedung <b>GALERI</b> ada di ujung jalan.</div>
+          )}
+
+          {world === 'city' && active?.link && (
             <a className="btn primary open-link" href={active.link} target="_blank" rel="noreferrer">
               Buka {active.title} ↗
             </a>
           )}
 
-          {allDone && !endingClosed && !active && (
-            <div className="ending glass">
-              <p className="kicker accent">Epilog</p>
-              <h2>{storyEnding.title}</h2>
-              <p>{storyEnding.text}</p>
-              <div className="ending-actions">
-                {contacts.map((c) => (
-                  <a key={c.label} className="btn primary" href={c.href} target="_blank" rel="noreferrer">{c.label}</a>
-                ))}
-                <button className="btn ghost" onClick={() => setEndingClosed(true)}>Tutup</button>
-              </div>
-            </div>
+          {world === 'room' && photo && (
+            <button className="photo-card glass" onClick={() => setZoomed(photo)}>
+              <img src={photoSrc(photo)} alt="" />
+              <span>
+                <b>{photo.caption}</b>
+                <small>Klik untuk perbesar</small>
+              </span>
+            </button>
           )}
         </>
       )}
+
+      {zoomed && <Lightbox photo={zoomed} onClose={() => setZoomed(null)} />}
     </div>
   )
 }

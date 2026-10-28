@@ -133,11 +133,20 @@ function RoadMarks() {
   )
 }
 
+const NEON = ['#41e2ff', '#ff4fd8', '#ffb259', '#8f7bff']
+
 function Towers() {
   const body = useRef()
-  const roof = useRef()
-  const mat = useMemo(() => makeFacadeMaterial({ lit: 0.3, seed: 2 }), [])
+  const crown = useRef()
+  const mech = useRef()
+  const spire = useRef()
+  const beacon = useRef()
+  const strip = useRef()
+  const band = useRef()
+  const mat = useMemo(() => makeFacadeMaterial({ lit: 0.28, glow: 1.3, seed: 2, floorH: 3.4, bayW: 1.5 }), [])
   const geo = useMemo(() => new THREE.BoxGeometry(1, 1, 1).translate(0, 0.5, 0), [])
+  const tall = useMemo(() => towers.filter((t) => t.h > 28), [])
+  const neon = useMemo(() => towers.filter((t) => t.seed > 0.72), [])
 
   useLayoutEffect(() => {
     towers.forEach((t, i) => {
@@ -147,21 +156,179 @@ function Towers() {
       dummy.updateMatrix()
       body.current.setMatrixAt(i, dummy.matrix)
       body.current.setColorAt(i, color.set(FACADES[Math.floor(t.tint * FACADES.length)]))
-      dummy.position.set(t.x + (t.seed - 0.5) * t.w * 0.3, t.h, t.z + (t.tint - 0.5) * t.d * 0.3)
-      dummy.scale.set(t.w * 0.45, 1 + t.seed * 1.6, t.d * 0.45)
+      // tingkat atas yang lebih ramping (setback)
+      const ch = 3 + t.seed * t.h * 0.22
+      dummy.position.set(t.x, t.h, t.z)
+      dummy.scale.set(t.w * 0.68, ch, t.d * 0.68)
       dummy.updateMatrix()
-      roof.current.setMatrixAt(i, dummy.matrix)
+      crown.current.setMatrixAt(i, dummy.matrix)
+      crown.current.setColorAt(i, color.set(FACADES[Math.floor(t.tint * FACADES.length)]).multiplyScalar(0.85))
+      // mesin AC / lift di atap
+      dummy.position.set(t.x + (t.seed - 0.5) * t.w * 0.25, t.h + ch, t.z + (t.tint - 0.5) * t.d * 0.25)
+      dummy.scale.set(t.w * 0.3, 1.2, t.d * 0.3)
+      dummy.updateMatrix()
+      mech.current.setMatrixAt(i, dummy.matrix)
     })
-    finish(body, roof)
-  }, [])
+    tall.forEach((t, i) => {
+      const top = t.h + 3 + t.seed * t.h * 0.22
+      const sh = 6 + t.tint * 12
+      dummy.position.set(t.x, top, t.z)
+      dummy.scale.set(0.25, sh, 0.25)
+      dummy.updateMatrix()
+      spire.current.setMatrixAt(i, dummy.matrix)
+      dummy.position.set(t.x, top + sh, t.z)
+      dummy.scale.set(0.45, 0.45, 0.45)
+      dummy.updateMatrix()
+      beacon.current.setMatrixAt(i, dummy.matrix)
+    })
+    neon.forEach((t, i) => {
+      const c = color.set(NEON[Math.floor(t.tint * NEON.length)]).multiplyScalar(2.5)
+      dummy.position.set(t.x + t.w / 2 + 0.04, 0.5, t.z + t.d / 2 + 0.04)
+      dummy.scale.set(0.16, t.h - 0.5, 0.16)
+      dummy.updateMatrix()
+      strip.current.setMatrixAt(i, dummy.matrix)
+      strip.current.setColorAt(i, c)
+      dummy.position.set(t.x, t.h - 0.35, t.z)
+      dummy.scale.set(t.w + 0.08, 0.22, t.d + 0.08)
+      dummy.updateMatrix()
+      band.current.setMatrixAt(i, dummy.matrix)
+      band.current.setColorAt(i, c)
+    })
+    finish(body, crown, mech, spire, beacon, strip, band)
+  }, [tall, neon])
 
   return (
     <>
       <instancedMesh ref={body} args={[geo, mat, towers.length]} castShadow receiveShadow />
-      <instancedMesh ref={roof} args={[geo, undefined, towers.length]} castShadow>
-        <meshStandardMaterial color="#6f7378" roughness={0.8} metalness={0.3} />
+      <instancedMesh ref={crown} args={[geo, mat, towers.length]} castShadow receiveShadow />
+      <instancedMesh ref={mech} args={[geo, undefined, towers.length]} castShadow>
+        <meshStandardMaterial color="#5d6166" roughness={0.7} metalness={0.4} />
+      </instancedMesh>
+      <instancedMesh ref={spire} args={[geo, undefined, tall.length]} castShadow>
+        <meshStandardMaterial color="#9aa0a6" roughness={0.3} metalness={0.9} />
+      </instancedMesh>
+      <instancedMesh ref={beacon} args={[undefined, undefined, tall.length]}>
+        <sphereGeometry args={[1, 10, 8]} />
+        <meshBasicMaterial color={[5, 0.4, 0.3]} toneMapped={false} />
+      </instancedMesh>
+      <instancedMesh ref={strip} args={[geo, undefined, neon.length]}>
+        <meshBasicMaterial toneMapped={false} />
+      </instancedMesh>
+      <instancedMesh ref={band} args={[geo, undefined, neon.length]}>
+        <meshBasicMaterial toneMapped={false} />
       </instancedMesh>
     </>
+  )
+}
+
+// billboard hologram di fasad gedung sepanjang boulevard
+function holoTexture(lines, hue) {
+  const c = document.createElement('canvas')
+  c.width = 256
+  c.height = 512
+  const g = c.getContext('2d')
+  const grad = g.createLinearGradient(0, 0, 0, 512)
+  grad.addColorStop(0, `hsla(${hue}, 90%, 55%, 0.95)`)
+  grad.addColorStop(1, `hsla(${(hue + 60) % 360}, 90%, 35%, 0.9)`)
+  g.fillStyle = grad
+  g.fillRect(0, 0, 256, 512)
+  g.fillStyle = 'rgba(0,0,0,0.18)'
+  for (let y = 0; y < 512; y += 4) g.fillRect(0, y, 256, 1.5) // garis scan
+  g.strokeStyle = 'rgba(255,255,255,0.8)'
+  g.lineWidth = 4
+  g.strokeRect(14, 14, 228, 484)
+  g.fillStyle = '#fff'
+  g.textAlign = 'center'
+  g.font = '700 46px "Space Grotesk", sans-serif'
+  lines.forEach((l, i) => g.fillText(l, 128, 190 + i * 64))
+  g.font = '500 18px "JetBrains Mono", monospace'
+  g.fillText('NEO · CITY', 128, 460)
+  const t = new THREE.CanvasTexture(c)
+  t.colorSpace = THREE.SRGBColorSpace
+  return t
+}
+
+const HOLO_COPY = [['CREATE', 'CODE', '3D'], ['BUILD', 'THE', 'FUTURE'], ['DESIGN', '+', 'DEV'], ['HELLO', 'WORLD', '*']]
+
+function HoloBoards() {
+  const boards = useMemo(() => {
+    const picks = towers.filter((t) => Math.abs(t.x) < 20 && t.z < -2 && t.z > -50 && t.h > 16).slice(0, 4)
+    return picks.map((t, i) => {
+      const side = Math.sign(t.x)
+      return {
+        x: t.x - side * (t.w / 2 + 0.08),
+        z: t.z,
+        rot: side > 0 ? -Math.PI / 2 : Math.PI / 2,
+        y: Math.min(t.h - 5, 14),
+        tex: holoTexture(HOLO_COPY[i % HOLO_COPY.length], (i * 70 + 180) % 360),
+      }
+    })
+  }, [])
+  const mats = useRef([])
+  useFrame((state) => {
+    const t = state.clock.elapsedTime
+    mats.current.forEach((m, i) => {
+      if (m) m.opacity = 0.82 + Math.sin(t * 3 + i * 2) * 0.06 + (Math.sin(t * 37 + i) > 0.97 ? -0.3 : 0)
+    })
+  })
+  return boards.map((b, i) => (
+    <mesh key={i} position={[b.x, b.y, b.z]} rotation-y={b.rot}>
+      <planeGeometry args={[4, 8]} />
+      <meshBasicMaterial ref={(m) => { mats.current[i] = m }} map={b.tex} transparent toneMapped={false} color={[1.6, 1.6, 1.6]} side={THREE.DoubleSide} />
+    </mesh>
+  ))
+}
+
+// kendaraan terbang di atas kota
+function SkyTraffic() {
+  const ref = useRef()
+  const cars = useMemo(() => {
+    const r = rng(41)
+    return Array.from({ length: 70 }, () => {
+      const alongZ = r() < 0.7
+      const dir = r() < 0.5 ? 1 : -1
+      return {
+        alongZ,
+        dir,
+        fixed: alongZ ? [-30, -14, 14, 30][Math.floor(r() * 4)] + dir * 1.5 : [-21, -64, -90][Math.floor(r() * 3)] + dir * 1.5,
+        y: 20 + Math.floor(r() * 4) * 7,
+        pos: -200 + r() * 260,
+        speed: 14 + r() * 14,
+        warm: dir > 0,
+      }
+    })
+  }, [])
+
+  useLayoutEffect(() => {
+    cars.forEach((c, i) => ref.current.setColorAt(i, c.warm ? color.setRGB(3.5, 3, 2.4) : color.setRGB(3.5, 0.5, 0.4)))
+    ref.current.instanceColor.needsUpdate = true
+  }, [cars])
+
+  useFrame((_, dt) => {
+    dt = Math.min(dt, 0.05)
+    cars.forEach((c, i) => {
+      c.pos += c.speed * c.dir * dt
+      if (c.pos > 60) c.pos = -200
+      if (c.pos < -200) c.pos = 60
+      if (c.alongZ) {
+        dummy.position.set(c.fixed, c.y, c.pos)
+        dummy.rotation.set(0, 0, 0)
+      } else {
+        dummy.position.set(c.pos, c.y, c.fixed)
+        dummy.rotation.set(0, Math.PI / 2, 0)
+      }
+      dummy.scale.set(0.5, 0.3, 2.4)
+      dummy.updateMatrix()
+      ref.current.setMatrixAt(i, dummy.matrix)
+    })
+    ref.current.instanceMatrix.needsUpdate = true
+  })
+
+  return (
+    <instancedMesh ref={ref} args={[undefined, undefined, cars.length]} frustumCulled={false}>
+      <capsuleGeometry args={[0.5, 1, 4, 8]} />
+      <meshBasicMaterial toneMapped={false} />
+    </instancedMesh>
   )
 }
 
@@ -391,6 +558,8 @@ export default function City({ playerRef }) {
     <group>
       <Ground />
       <Towers />
+      <HoloBoards />
+      <SkyTraffic />
       <Lamps />
       <Planters />
       <Traffic playerRef={playerRef} />

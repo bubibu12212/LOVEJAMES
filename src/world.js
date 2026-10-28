@@ -50,8 +50,9 @@ export function applyWind(material, strength, fadeNear = 0) {
 
 // Material gedung kaca: pola jendela dihitung dari posisi dunia, jadi cocok untuk gedung ukuran apa pun.
 // Warna dasar (color / instanceColor) = warna rangka fasad.
-export function makeFacadeMaterial({ floorH = 3.2, bayW = 1.7, lit = 0.35, seed = 0 } = {}) {
-  const m = new THREE.MeshStandardMaterial({ roughness: 0.55, metalness: 0.25 })
+// glow = terang lampu jendela (malam: besar), lit = proporsi jendela yang menyala.
+export function makeFacadeMaterial({ floorH = 3.2, bayW = 1.7, lit = 0.35, seed = 0, glow = 0.9 } = {}) {
+  const m = new THREE.MeshStandardMaterial({ roughness: 0.55, metalness: 0.2 })
   m.onBeforeCompile = (shader) => {
     shader.vertexShader = 'varying vec3 vWPos;\nvarying vec3 vWNorm;\n' + shader.vertexShader.replace(
       '#include <project_vertex>',
@@ -74,21 +75,35 @@ export function makeFacadeMaterial({ floorH = 3.2, bayW = 1.7, lit = 0.35, seed 
           float u = abs(vWNorm.x) > 0.5 ? vWPos.z : vWPos.x;
           vec2 cell = vec2(u / ${bayW.toFixed(2)}, (vWPos.y - 0.6) / ${floorH.toFixed(2)});
           vec2 f = fract(cell);
-          float win = step(0.12, f.x) * step(f.x, 0.88) * step(0.22, f.y) * step(f.y, 0.86) * side * step(1.0, cell.y);
-          float lit = step(${(1 - lit).toFixed(2)}, fHash(floor(cell) + floor(vWPos.xz * 0.05)));
-          vec3 glass = mix(vec3(0.07, 0.11, 0.15), vec3(0.32, 0.42, 0.5), clamp(vWPos.y / 60.0, 0.0, 1.0));
-          diffuseColor.rgb = mix(diffuseColor.rgb, glass, win);
-          float winLit = win * lit;`
+          float win = step(0.07, f.x) * step(f.x, 0.93) * step(0.2, f.y) * step(f.y, 0.9) * side * step(1.0, cell.y);
+          vec2 wid = floor(cell) + floor(vWPos.xz * 0.05);
+          float h1 = fHash(wid);
+          float h2 = fHash(wid + 17.3);
+          float lit = step(${(1 - lit).toFixed(2)}, h1);
+          // kaca: gelap di bawah, sedikit memantulkan langit di atas; tirai acak membuat variasi
+          vec3 glass = mix(vec3(0.05, 0.08, 0.11), vec3(0.22, 0.3, 0.38), clamp(vWPos.y / 70.0, 0.0, 1.0)) * (0.8 + 0.4 * h2);
+          // pita lantai (spandrel) sedikit lebih gelap dari rangka
+          float band = side * (1.0 - step(0.2, f.y)) * 0.25;
+          diffuseColor.rgb = mix(diffuseColor.rgb * (1.0 - band), glass, win);
+          // dasar gedung lebih gelap (kesan ambient occlusion)
+          diffuseColor.rgb *= mix(0.7, 1.0, clamp(vWPos.y / 6.0, 0.0, 1.0));
+          vec3 litCol = mix(vec3(1.0, 0.76, 0.48), vec3(0.75, 0.88, 1.0), step(0.7, h2));
+          vec3 winGlow = litCol * win * lit * (0.55 + 0.6 * fract(h2 * 7.0));`
         )
         .replace(
           '#include <emissivemap_fragment>',
           `#include <emissivemap_fragment>
-          totalEmissiveRadiance += vec3(1.0, 0.78, 0.5) * 0.85 * winLit;`
+          totalEmissiveRadiance += winGlow * ${glow.toFixed(2)};`
         )
         .replace(
           '#include <roughnessmap_fragment>',
           `#include <roughnessmap_fragment>
-          roughnessFactor = mix(roughnessFactor, 0.12, win);`
+          roughnessFactor = mix(roughnessFactor, 0.06, win);`
+        )
+        .replace(
+          '#include <metalnessmap_fragment>',
+          `#include <metalnessmap_fragment>
+          metalnessFactor = mix(metalnessFactor, 0.85, win * (1.0 - lit));`
         )
   }
   return m

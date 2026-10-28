@@ -6,6 +6,14 @@ import { photoSrc } from '../world'
 function Loader() {
   const { progress, active } = useProgress()
   const done = !active && progress >= 100
+  const [gone, setGone] = useState(false)
+  // hanya tampil saat pemuatan pertama
+  useEffect(() => {
+    if (!done) return
+    const t = setTimeout(() => setGone(true), 900)
+    return () => clearTimeout(t)
+  }, [done])
+  if (gone) return null
   return (
     <div className={`loader ${done ? 'is-done' : ''}`}>
       <p className="eyebrow">Membangun kota</p>
@@ -33,18 +41,26 @@ function Lightbox({ photo, onClose }) {
 }
 
 // teks di atas gerbang selama mode scroll (opacity diatur lewat CSS var --p)
-export function ScrollIntro() {
+export function ScrollIntro({ canEnter, onEnter }) {
   return (
-    <div className="gate-intro">
-      <p className="eyebrow">Projects</p>
-      <h2>Selamat datang di kotaku.</h2>
-      <p>Setiap gedung menyimpan satu project atau pengalaman.</p>
-      <div className="scroll-hint"><span />Scroll untuk membuka gerbang</div>
-    </div>
+    <>
+      <div className="gate-intro">
+        <p className="eyebrow">Sector 02 · Projects</p>
+        <h2>Selamat datang di kotaku.</h2>
+        <p>Setiap gedung menyimpan satu project atau pengalaman.</p>
+        <div className="scroll-hint"><span />Scroll untuk membuka gerbang</div>
+      </div>
+      <div className={`enter-cta ${canEnter ? 'show' : ''}`}>
+        <button className="btn primary btn-lg" onClick={onEnter} tabIndex={canEnter ? 0 : -1}>
+          Masuk ke Kota <span aria-hidden>→</span>
+        </button>
+        <p>atau tekan <kbd>Enter</kbd> · kamu yang kendalikan karakternya</p>
+      </div>
+    </>
   )
 }
 
-export default function Overlay({ mode, world, active, photo, fade, onExit }) {
+export default function Overlay({ mode, world, active, photo, fade, canEnter, onEnter, onExit }) {
   const [zoomed, setZoomed] = useState(null)
 
   return (
@@ -52,7 +68,7 @@ export default function Overlay({ mode, world, active, photo, fade, onExit }) {
       <Loader />
       <div className={`fade ${fade ? 'on' : ''}`} />
 
-      {mode === 'scroll' && <ScrollIntro />}
+      {mode === 'scroll' && <ScrollIntro canEnter={canEnter} onEnter={onEnter} />}
 
       {mode === 'explore' && (
         <>

@@ -87,7 +87,12 @@ export default function Character({ playerRef, enabled, bounds, obstacles }) {
       }
     }
 
-    scene.traverse((o) => { if (o.isMesh) o.castShadow = true })
+    scene.traverse((o) => {
+      if (!o.isMesh) return
+      o.castShadow = true
+      // kurangi pantulan lingkungan supaya bagian logam (gesper emas) tidak silau kena bloom
+      o.material.envMapIntensity = 0.35
+    })
     actions['Head_PivotAction']?.play()
   }, [actions, scene])
 

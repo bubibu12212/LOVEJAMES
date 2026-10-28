@@ -42,18 +42,23 @@ function mountAnimation(container) {
   resize()
 
   let frame
+  let visible = true
   const clock = new THREE.Clock()
   const loop = () => {
+    frame = requestAnimationFrame(loop)
+    if (!visible) return // berhenti render saat tidak terlihat (hemat GPU)
     const t = clock.getElapsedTime()
     knot.rotation.set(t * 0.3, t * 0.45, 0)
     wire.rotation.set(-t * 0.1, t * 0.15, 0)
     renderer.render(scene, camera)
-    frame = requestAnimationFrame(loop)
   }
   loop()
+  const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting })
+  io.observe(container)
 
   return () => {
     cancelAnimationFrame(frame)
+    io.disconnect()
     ro.disconnect()
     renderer.dispose()
     renderer.domElement.remove()

@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { Sky } from '@react-three/drei'
+import { Sky, Environment, Lightformer } from '@react-three/drei'
+import { EffectComposer, Bloom, Vignette, SMAA } from '@react-three/postprocessing'
 import * as THREE from 'three'
 import Character from './Character'
 import Gate from './Gate'
@@ -18,6 +19,9 @@ const lookNow = new THREE.Vector3(0, 4, 0)
 const boardPos = new THREE.Vector3()
 const gateCam = new THREE.Vector3()
 const gateLook = new THREE.Vector3()
+const entryFrom = new THREE.Vector3()
+const entryLook = new THREE.Vector3()
+const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2)
 
 const smooth = (a, b, x) => THREE.MathUtils.smoothstep(x, a, b)
 
@@ -65,11 +69,12 @@ export default function Scene({ mode, world, progressRef, onActive, onPhoto, onW
   const activePhoto = useRef(null)
   const gateOpen = useRef(0)
   const focus = useRef(0)
-  const activeSince = useRef(0)
   const switching = useRef(false)
+  const entry = useRef(1)
+  const [ready, setReady] = useState(false)
   const { camera } = useThree()
   const explore = mode === 'explore'
-  useOrbitControls(explore)
+  useOrbitControls(explore && ready)
 
   // pindah dunia: taruh pemain di titik masuk
   useEffect(() => {
@@ -88,36 +93,37 @@ export default function Scene({ mode, world, progressRef, onActive, onPhoto, onW
     switching.current = false
   }, [world, camera])
 
-  // keluar dari mode jelajah: kembalikan pemain ke titik awal supaya animasi gerbang tetap pas
+  // masuk: kamera terbang pelan dari gerbang ke belakang karakter.
+  // keluar: kembalikan pemain ke titik awal supaya tampilan gerbang tetap pas
   useEffect(() => {
-    if (explore) return
+    if (explore) {
+      entry.current = 0
+      entryFrom.copy(camera.position)
+      entryLook.copy(lookNow)
+      return
+    }
     player.current.position.set(...PLAYER_START)
     player.current.rotation.y = 0
     Object.assign(camState, { yaw: 0, pitch: 0.38, dist: 7 })
-  }, [explore])
+  }, [explore, camera])
 
-  useFrame((state, dt) => {
-    dt = Math.min(dt, 0.05)
+  useFrame((state, rawDt) => {
+    const dt = Math.min(rawDt, 0.05)
     const p = player.current.position
     windTime.value = state.clock.elapsedTime
     const inRoom = world === 'room'
 
     if (!explore) {
-      // ===== mode scroll: kamera mendekati gerbang, pintu terbuka, lalu masuk ke kota =====
+      if (ready) setReady(false)
+      // ===== mode scroll: kamera mendekat pelan ke gerbang & pintu terbuka (tidak masuk otomatis) =====
       const t = progressRef.current
-      gateOpen.current = smooth(0.1, 0.48, t)
-      const enter = smooth(0.42, 1, t)
-      gateCam.set(0, 3.2 - t * 0.8, 26 - Math.min(t, 0.42) * 16)
-      gateLook.set(0, 7 - t * 4, 0)
-      const { yaw, pitch, dist } = camState
-      const flat = Math.cos(pitch) * dist
-      camPos.set(p.x + Math.sin(yaw) * flat, 1.2 + Math.sin(pitch) * dist, p.z + Math.cos(yaw) * flat)
-      camLook.set(p.x, 1.25, p.z)
-      camPos.lerpVectors(gateCam, camPos, enter)
-      camLook.lerpVectors(gateLook, camLook, enter)
-      const k = 1 - Math.exp(-10 * dt)
-      camera.position.lerp(camPos, k)
-      lookNow.lerp(camLook, k)
+      gateOpen.current = smooth(0.15, 0.75, t)
+      const e = smooth(0, 1, t)
+      gateCam.set(0, 3.4 - e * 0.6, 26 - e * 9)
+      gateLook.set(0, 7 - e * 2.2, 0)
+      const k = 1 - Math.exp(-5 * dt)
+      camera.position.lerp(gateCam, k)
+      lookNow.lerp(gateLook, k)
       camera.lookAt(lookNow)
     } else {
       gateOpen.current = 1
@@ -125,17 +131,10 @@ export default function Scene({ mode, world, progressRef, onActive, onPhoto, onW
       const board = !inRoom && stationSpots.find((s) => s.id === activeId.current)
       focus.current = THREE.MathUtils.damp(focus.current, board ? 1 : 0, 3, dt)
       const f = focus.current
-      if (board) {
-        boardPos.set(board.side * 7.4, 3.1, board.z)
-        if (state.clock.elapsedTime - activeSince.current < 1.8) {
-          const want = Math.atan2(p.x - boardPos.x, p.z - boardPos.z)
-          const diff = Math.atan2(Math.sin(want - camState.yaw), Math.cos(want - camState.yaw))
-          camState.yaw += diff * (1 - Math.exp(-3 * dt))
-        }
-      }
+      if (board) boardPos.set(board.side * 7.4, 3.1, board.z)
       const { yaw } = camState
       let pitch = camState.pitch + f * Math.max(0, 0.3 - camState.pitch)
-      let dist = camState.dist + f * Math.max(0, 8.5 - camState.dist)
+      let dist = camState.dist + f * Math.max(0, 8 - camState.dist)
       if (inRoom) {
         // di dalam ruangan kamera lebih dekat & datar supaya foto di dinding terlihat
         pitch = Math.min(pitch, 0.22)
@@ -144,7 +143,7 @@ export default function Scene({ mode, world, progressRef, onActive, onPhoto, onW
       const flat = Math.cos(pitch) * dist
       camPos.set(p.x + Math.sin(yaw) * flat, 1.2 + Math.sin(pitch) * dist, p.z + Math.cos(yaw) * flat)
       camLook.set(p.x, inRoom ? 1.7 : 1.25, p.z)
-      camLook.lerp(boardPos, f * 0.6)
+      camLook.lerp(boardPos, f * 0.45)
 
       if (inRoom) {
         // kamera tetap di dalam ruangan
@@ -165,18 +164,27 @@ export default function Scene({ mode, world, progressRef, onActive, onPhoto, onW
           }
         }
       }
-      const k = 1 - Math.exp(-4 * dt)
-      camera.position.lerp(camPos, k)
-      lookNow.lerp(camLook, k)
+      if (entry.current < 1) {
+        // animasi masuk: terbang mulus lewat gerbang (sekitar 2,4 detik)
+        entry.current = Math.min(1, entry.current + Math.min(rawDt, 0.25) / 2.4)
+        const e = easeInOut(entry.current)
+        camera.position.lerpVectors(entryFrom, camPos, e)
+        lookNow.lerpVectors(entryLook, camLook, e)
+        if (entry.current === 1) setReady(true)
+      } else {
+        const k = 1 - Math.exp(-4 * dt)
+        camera.position.lerp(camPos, k)
+        lookNow.lerp(camLook, k)
+      }
       camera.lookAt(lookNow)
     }
 
     // bayangan ikut pemain
-    light.current.position.set(p.x + 14, 26, p.z + 18)
+    light.current.position.set(p.x + 30, 16, p.z + 20)
     light.current.target.position.set(p.x, 0, p.z)
     light.current.target.updateMatrixWorld()
 
-    if (!explore || switching.current) return
+    if (!explore || !ready || switching.current) return
 
     if (!inRoom) {
       // gedung project terdekat
@@ -187,7 +195,6 @@ export default function Scene({ mode, world, progressRef, onActive, onPhoto, onW
       const id = near?.id ?? null
       if (id !== activeId.current) {
         activeId.current = id
-        activeSince.current = state.clock.elapsedTime
         onActive(near)
       }
       // masuk gedung galeri
@@ -217,13 +224,19 @@ export default function Scene({ mode, world, progressRef, onActive, onPhoto, onW
 
   return (
     <>
-      <Sky sunPosition={[40, 14, 60]} turbidity={7} rayleigh={1.6} mieCoefficient={0.006} mieDirectionalG={0.88} />
-      <fog attach="fog" args={['#d7c8b6', 45, 170]} />
-      <hemisphereLight args={['#dfe9f5', '#6b6158', 0.85]} />
+      {/* senja: matahari rendah, langit oranye-ungu, kabut tipis */}
+      <Sky sunPosition={[70, 9, 45]} turbidity={9} rayleigh={2.6} mieCoefficient={0.008} mieDirectionalG={0.9} />
+      <fog attach="fog" args={['#c9a08f', 50, 210]} />
+      <hemisphereLight args={['#aebfe0', '#5a4a44', 0.7]} />
+      <Environment resolution={256} frames={1} environmentIntensity={0.7}>
+        <Lightformer intensity={3} color="#ffb27a" position={[60, 8, 40]} scale={[80, 18, 1]} target={[0, 0, 0]} />
+        <Lightformer intensity={1.2} color="#8fa7e8" position={[0, 60, 0]} rotation-x={Math.PI / 2} scale={[160, 160, 1]} />
+        <Lightformer intensity={0.6} color="#ff8fb8" position={[-60, 10, -40]} scale={[80, 14, 1]} target={[0, 0, 0]} />
+      </Environment>
       <directionalLight
         ref={light}
-        intensity={2.6}
-        color="#ffe2bd"
+        intensity={2.4}
+        color="#ffc995"
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0004}
@@ -247,9 +260,15 @@ export default function Scene({ mode, world, progressRef, onActive, onPhoto, onW
         <GalleryRoom activePhotoRef={activePhoto} />
       </group>
 
+      <EffectComposer multisampling={0} enableNormalPass={false}>
+        <Bloom mipmapBlur luminanceThreshold={0.95} intensity={0.75} radius={0.7} />
+        <Vignette offset={0.3} darkness={0.55} />
+        <SMAA />
+      </EffectComposer>
+
       <Character
         playerRef={player}
-        enabled={explore}
+        enabled={explore && ready}
         bounds={world === 'room' ? ROOM_BOUNDS : CITY_BOUNDS}
         obstacles={world === 'room' ? roomObstacles : cityObstacles}
       />

@@ -20,6 +20,7 @@ export default function App() {
   const [photo, setPhoto] = useState(null)
   const [fade, setFade] = useState(false)
   const [inView, setInView] = useState(false)
+  const [canEnter, setCanEnter] = useState(false)
   const section = useRef()
   const stage = useRef()
   const progress = useRef(0)
@@ -38,9 +39,6 @@ export default function App() {
     setPhoto(null)
     setWorld('city')
     document.body.classList.remove('locked')
-    const el = section.current
-    // kembali ke tengah animasi gerbang supaya tidak langsung masuk lagi
-    window.scrollTo({ top: el.offsetTop + (el.offsetHeight - window.innerHeight) * 0.55 })
   }, [])
 
   // progres scroll di section Projects: 0 = gerbang tertutup, 1 = sudah di dalam kota
@@ -51,7 +49,8 @@ export default function App() {
       const p = Math.min(1, Math.max(0, (window.scrollY - el.offsetTop) / range))
       progress.current = p
       stage.current.style.setProperty('--p', p.toFixed(3))
-      if (p >= 0.995 && modeRef.current === 'scroll') enter()
+      // tombol "Masuk ke Kota" muncul setelah gerbang terbuka; user sendiri yang memutuskan masuk
+      setCanEnter(p > 0.6)
     }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -60,7 +59,14 @@ export default function App() {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
     }
-  }, [enter])
+  }, [])
+
+  useEffect(() => {
+    if (mode !== 'scroll' || !canEnter) return
+    const key = (e) => { if (e.key === 'Enter') enter() }
+    window.addEventListener('keydown', key)
+    return () => window.removeEventListener('keydown', key)
+  }, [mode, canEnter, enter])
 
   // hanya render 3D saat section terlihat (hemat baterai)
   useEffect(() => {
@@ -113,7 +119,7 @@ export default function App() {
               </Suspense>
             </Canvas>
           </KeyboardControls>
-          <Overlay mode={mode} world={world} active={active} photo={photo} fade={fade} onExit={exit} />
+          <Overlay mode={mode} world={world} active={active} photo={photo} fade={fade} canEnter={canEnter} onEnter={enter} onExit={exit} />
         </div>
       </section>
 

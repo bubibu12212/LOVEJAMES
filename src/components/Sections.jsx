@@ -1,5 +1,7 @@
-import { profile } from '../data'
+import { useEffect, useState } from 'react'
+import { profile, stations, gallery } from '../data'
 import About3D from './About3D'
+import HeroCity from './HeroCity'
 
 const links = profile.contacts.filter((c) => c.href && c.href !== '#')
 
@@ -16,21 +18,64 @@ export function Nav() {
   )
 }
 
+const ROLES = ['Developer', 'Creative Technologist', '3D Web Builder', 'Problem Solver']
+
+function RoleRotator() {
+  const [i, setI] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => setI((v) => (v + 1) % ROLES.length), 2400)
+    return () => clearInterval(t)
+  }, [])
+  return (
+    <span className="role-rotator">
+      <span key={i}>{ROLES[i]}</span>
+    </span>
+  )
+}
+
 export function Hero() {
+  const projects = stations.filter((s) => s.type === 'project').length
+  const exp = stations.filter((s) => s.type === 'experience').length
+  const [first, ...rest] = profile.name.split(' ')
+
   return (
     <header className="hero" id="top">
-      <div className="hero-grid" aria-hidden />
+      <HeroCity />
+      <div className="hero-shade" aria-hidden />
+      <div className="hud-frame" aria-hidden><i /><i /><i /><i /></div>
+      <div className="hero-meta mono" aria-hidden>
+        <span>SECTOR 01 · HOME</span>
+        <span className="hide-sm">NEO-CITY / {new Date().getFullYear()}</span>
+      </div>
+
       <div className="hero-inner">
-        <p className="eyebrow">Portfolio</p>
-        <h1>{profile.name}</h1>
-        <p className="hero-role">{profile.role}</p>
+        <p className="status-pill"><span className="dot" /> Open for collaboration</p>
+        <h1>
+          <span className="line"><span>{first}</span></span>
+          <span className="line"><span className="grad">{rest.join(' ')}</span></span>
+        </h1>
+        <p className="hero-role">
+          <span className="mono">&gt;</span> <RoleRotator />
+        </p>
         <p className="hero-tag">{profile.tagline}</p>
         <div className="hero-actions">
-          <a className="btn primary" href="#projects">Jelajahi Kota Project</a>
-          <a className="btn ghost" href="#about">Tentang Aku</a>
+          <a className="btn primary" href="#projects">Jelajahi Kota Project <span aria-hidden>→</span></a>
+          <a className="btn ghost glass" href="#about">Tentang Aku</a>
         </div>
       </div>
-      <a className="scroll-cue" href="#about" aria-label="Scroll ke bawah"><span /></a>
+
+      <div className="hero-bottom">
+        <dl className="stats">
+          <div><dt>{String(projects).padStart(2, '0')}</dt><dd>Project</dd></div>
+          <div><dt>{String(exp).padStart(2, '0')}</dt><dd>Pengalaman</dd></div>
+          <div><dt>{String(gallery.length).padStart(2, '0')}</dt><dd>Momen</dd></div>
+        </dl>
+        <div className="marquee" aria-hidden>
+          <div>
+            {[...profile.skills, ...profile.skills, ...profile.skills, ...profile.skills].map((s, i) => <span key={i}>{s}</span>)}
+          </div>
+        </div>
+      </div>
     </header>
   )
 }

@@ -1,5 +1,5 @@
 // ===================== PROFIL =====================
-// Ganti dengan data kamu. Kontak yang link-nya '#' tidak akan ditampilkan.
+// Ganti dengan data kamu. Kontak yang link-nya '#' tetap tampil, tapi tidak bisa diklik.
 export const profile = {
   name: 'Salsa Ica Indriani',
   short: 'SALSA',
@@ -10,7 +10,7 @@ export const profile = {
     "I'm Salsa, a recent Informatics graduate passionate about software development and technology. I love turning ideas into clean, useful digital products — from the logic behind the scenes to the interface people actually touch.",
   ],
   facts: [
-    { label: 'Education', value: 'S1 Informatics' },
+    { label: 'Education', value: 'B.Sc. Informatics' },
     { label: 'Focus', value: 'Software Development' },
     { label: 'Based in', value: 'Indonesia' },
   ],
@@ -26,43 +26,51 @@ export const profile = {
   ],
 }
 
-// ===================== PROJECT (kartu + gedung di kota 3D) =====================
-// category = label kecil di kartu, building = gaya ilustrasi gedung di kartu:
-//   'glass' | 'apartment' | 'villa' | 'shop' | 'green' | 'wooden'
-// side: -1 = kiri boulevard, 1 = kanan. z = posisi sepanjang jalan di kota 3D.
-// Posisi yang tersedia: kiri z -9, -30, -41 dan kanan z -11, -30, -41 (z sekitar -21 itu jalan raya).
-// floors = jumlah lantai gedung 3D, link = tombol "View project" (kosongkan kalau belum ada)
-export const stations = [
-  { id: 'p1', type: 'project', category: 'Web App', building: 'glass', title: 'Web App Project',
-    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
-    tech: ['React', 'Node.js'], link: '', side: -1, z: -9, floors: 7 },
-  { id: 'p2', type: 'project', category: 'Mobile App', building: 'apartment', title: 'Mobile App Project',
-    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
-    tech: ['Flutter', 'Firebase'], link: '', side: 1, z: -11, floors: 6 },
-  { id: 'p3', type: 'project', category: 'UI/UX Design', building: 'villa', title: 'UI/UX Case Study',
-    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
-    tech: ['Figma'], link: '', side: -1, z: -30, floors: 4 },
-  { id: 'p4', type: 'project', category: 'Database', building: 'shop', title: 'Database System',
-    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
-    tech: ['SQL', 'PostgreSQL'], link: '', side: 1, z: -30, floors: 5 },
-  { id: 'p5', type: 'project', category: 'Machine Learning', building: 'green', title: 'ML / Data Project',
-    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
-    tech: ['Python', 'Pandas'], link: '', side: -1, z: -41, floors: 8 },
-  { id: 'p6', type: 'project', category: 'Final Thesis', building: 'wooden', title: 'Thesis Project',
-    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
-    tech: ['Research'], link: '', side: 1, z: -41, floors: 3 },
+// ===================== CERITA PERJALANAN (di taman) =====================
+// Foto-foto yang muncul (pop-up) di sepanjang jalan taman, urut dari depan ke belakang. Maksimal 8.
+// Taruh foto di public/gallery/, lalu isi src seperti '/gallery/foto1.jpg'. Kalau kosong, muncul gambar contoh.
+export const journey = [
+  { year: '2020', title: 'First line of code', text: 'Started my Informatics degree and wrote my very first program.', src: '' },
+  { year: '2021', title: 'Campus organization', text: 'Joined a student tech community and learned to work in a team.', src: '' },
+  { year: '2021', title: 'First web project', text: 'Built and shipped my first website for a real client.', src: '' },
+  { year: '2022', title: 'Hackathon', text: 'Spent 24 hours building a prototype with friends.', src: '' },
+  { year: '2023', title: 'Internship', text: 'Worked with a product team on a production app.', src: '' },
+  { year: '2023', title: 'Teaching assistant', text: 'Helped juniors learn programming fundamentals.', src: '' },
+  { year: '2024', title: 'Final thesis', text: 'Researched and built my final thesis project.', src: '' },
+  { year: '2025', title: 'Graduation day', text: 'Graduated — and ready for what comes next.', src: '' },
 ]
 
-// ===================== GALERI KEGIATAN =====================
-// Taruh foto di folder public/gallery/, lalu isi src seperti '/gallery/foto1.jpg'.
-// Kalau src kosong, akan muncul gambar contoh. Maksimal 11 foto.
-export const gallery = [
-  { src: '', caption: 'Kegiatan 1 — tulis keterangan foto di sini' },
-  { src: '', caption: 'Kegiatan 2' },
-  { src: '', caption: 'Kegiatan 3' },
-  { src: '', caption: 'Kegiatan 4' },
-  { src: '', caption: 'Kegiatan 5' },
-  { src: '', caption: 'Kegiatan 6' },
-  { src: '', caption: 'Kegiatan 7' },
-  { src: '', caption: 'Kegiatan 8' },
+// ===================== PROJECT (gedung yang bisa dimasuki) =====================
+// interior = tema ruangan di dalam gedung (juga menentukan bentuk gedungnya):
+//   'house' | 'office' | 'apartment' | 'dorm' | 'lab' | 'studio'
+// tools = isi bingkai di dinding ruangan (tools yang kamu pakai di project itu)
+// details = teks panjang di jendela project (muncul saat layar/TV di dalam ruangan diklik)
+// images = foto/screenshot project, contoh ['/projects/web1.jpg'] (taruh di public/projects/)
+// link = tombol "Open project" (kosongkan kalau belum ada)
+// Urutan = urutan gedung di taman: kiri-kanan bergantian dari depan ke belakang.
+export const stations = [
+  { id: 'p1', interior: 'house', category: 'Web App', title: 'Web App Project',
+    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
+    details: 'Describe the project here: what problem it solves, what you built, your role, and what you learned along the way.',
+    tech: ['React', 'Node.js', 'MongoDB'], tools: ['VS Code', 'React', 'Node.js', 'Figma', 'Git', 'Postman'], images: [], link: '' },
+  { id: 'p2', interior: 'office', category: 'Mobile App', title: 'Mobile App Project',
+    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
+    details: 'Describe the project here: what problem it solves, what you built, your role, and what you learned along the way.',
+    tech: ['Flutter', 'Firebase'], tools: ['Flutter', 'Dart', 'Firebase', 'Android Studio', 'Figma', 'Git'], images: [], link: '' },
+  { id: 'p3', interior: 'apartment', category: 'UI/UX Design', title: 'UI/UX Case Study',
+    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
+    details: 'Describe the project here: what problem it solves, what you built, your role, and what you learned along the way.',
+    tech: ['Figma'], tools: ['Figma', 'FigJam', 'Notion', 'Maze'], images: [], link: '' },
+  { id: 'p4', interior: 'dorm', category: 'Database', title: 'Database System',
+    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
+    details: 'Describe the project here: what problem it solves, what you built, your role, and what you learned along the way.',
+    tech: ['SQL', 'PostgreSQL'], tools: ['PostgreSQL', 'MySQL', 'DBeaver', 'Laravel'], images: [], link: '' },
+  { id: 'p5', interior: 'lab', category: 'Machine Learning', title: 'ML / Data Project',
+    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
+    details: 'Describe the project here: what problem it solves, what you built, your role, and what you learned along the way.',
+    tech: ['Python', 'Pandas'], tools: ['Python', 'Pandas', 'scikit-learn', 'Jupyter', 'TensorFlow', 'Colab'], images: [], link: '' },
+  { id: 'p6', interior: 'studio', category: 'Final Thesis', title: 'Thesis Project',
+    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
+    details: 'Describe the project here: what problem it solves, what you built, your role, and what you learned along the way.',
+    tech: ['Research'], tools: ['Python', 'LaTeX', 'Mendeley', 'Excel'], images: [], link: '' },
 ]

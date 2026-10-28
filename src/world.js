@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { stations, gallery } from './data'
+import { stations, journey } from './data'
 
 // kamera orbit: yaw = putaran kiri/kanan, pitch = sudut atas/bawah, dist = jarak (zoom)
 export const camState = { yaw: 0, pitch: 0.38, dist: 7 }
@@ -109,100 +109,138 @@ export function makeFacadeMaterial({ floorH = 3.2, bayW = 1.7, lit = 0.35, seed 
   return m
 }
 
-// ===================== TATA KOTA =====================
-export const AVENUE_HALF = 4.5        // setengah lebar boulevard pejalan kaki
-export const FACADE_X = 8             // garis depan gedung project
-export const CROSS_Z = -21            // jalan raya yang memotong boulevard
-export const ROAD_W = 7
-export const SIDE_AVENUE_X = 21.5     // jalan raya di belakang gedung project
-export const GALLERY = { z: -55, front: -46.5, ring: [0, -43.4] }
-export const PLAYER_START = [0, 0, -6.5]
-export const CITY_BOUNDS = { minX: -7.3, maxX: 7.3, minZ: -44.8, maxZ: 8 }
+// ===================== TATA TAMAN =====================
+// Gerbang di z = 0, jalan setapak lurus ke arah -z: cerita perjalanan → kolam & jembatan → gedung project → kontak.
+export const GARDEN_HALF = 16          // tembok samping di x = ±16
+export const GARDEN_END = -112         // tembok belakang
+export const PATH_HALF = 1.5
+export const PLAYER_START = [0, 0, -5]
+export const GARDEN_BOUNDS = { minX: -15.2, maxX: 15.2, minZ: -109.6, maxZ: -1.3 }
+export const POND = { z: -47, rx: 9, rz: 4.6 }
+export const BRIDGE = { z0: -41.4, z1: -52.6, half: 1.25, rise: 0.85 }
+export const CONTACT = { x: 0, z: -101, character: [-2, -104.4], board: [1.8, -104.6] }
 
-const ACCENTS = ['#ff3b2f', '#ff8a3d', '#ff4f8b', '#ffd25e', '#5fe0ff', '#c58bff']
-export const stationSpots = stations.map((s, i) => ({
-  accent: ACCENTS[i % ACCENTS.length],
-  ...s,
-  center: [s.side * 13, s.z],
-  ring: [s.side * 6.2, s.z],
-}))
+// tinggi tanah (hanya jembatan yang melengkung)
+export function groundY(x, z) {
+  if (Math.abs(x) > BRIDGE.half + 0.2 || z > BRIDGE.z0 || z < BRIDGE.z1) return 0
+  const t = (BRIDGE.z0 - z) / (BRIDGE.z0 - BRIDGE.z1)
+  return BRIDGE.rise * Math.sin(Math.PI * t)
+}
 
-// gedung latar (bukan gedung project)
-const rand = rng(5)
-export const towers = []
-function addTower(x, z, w, d, h) {
-  towers.push({ x, z, w, d, h, tint: rand(), seed: rand() })
-}
-function blocked(x, z, w, d) {
-  const hit = (cx, cz, hw, hd) => Math.abs(x - cx) < w / 2 + hw && Math.abs(z - cz) < d / 2 + hd
-  if (hit(0, CROSS_Z, 200, ROAD_W / 2 + 0.5)) return true
-  if (hit(0, -64, 200, ROAD_W / 2)) return true
-  if (hit(SIDE_AVENUE_X, 0, ROAD_W / 2 + 0.5, 300) || hit(-SIDE_AVENUE_X, 0, ROAD_W / 2 + 0.5, 300)) return true
-  if (hit(0, 0, 60, 1.5)) return true // tembok kota
-  if (hit(0, GALLERY.z, 10, 9.5)) return true
-  return stationSpots.some((s) => hit(s.center[0], s.center[1], 5.5, 5))
-}
-// barisan di samping gedung project
-for (const side of [-1, 1]) {
-  for (let z = -3; z > -60; z -= 7) {
-    const w = 8 + rand() * 2
-    const d = 5.5 + rand() * 1.5
-    const x = side * (FACADE_X + 0.5 + w / 2)
-    if (z > -2 || blocked(x, z, w, d)) continue
-    addTower(x, z, w, d, 9 + rand() * 18)
-  }
-}
-// blok-blok kota di sekelilingnya
-for (let gx = -90; gx <= 90; gx += 11) {
-  for (let gz = 40; gz >= -150; gz -= 11) {
-    if (Math.abs(gx) < 25 && gz > -66) continue
-    const w = 6 + rand() * 4
-    const d = 6 + rand() * 4
-    const x = gx + (rand() - 0.5) * 2
-    const z = gz + (rand() - 0.5) * 2
-    if (blocked(x, z, w, d)) continue
-    const far = Math.hypot(x, z + 30) / 90
-    addTower(x, z, w, d, 12 + rand() * 30 + far * 40 * rand())
+// dorong titik p keluar dari semua penghalang (dipakai pemain & kamera).
+// useHeight = abaikan penghalang yang lebih rendah dari p (untuk kamera)
+export function pushOut(p, obstacles, pad, useHeight = false) {
+  for (const o of obstacles) {
+    if (useHeight && p.y > o.h + 0.3) continue
+    if (o.hw !== undefined) {
+      const dx = p.x - o.x
+      const dz = p.z - o.z
+      const ox = o.hw + pad - Math.abs(dx)
+      const oz = o.hd + pad - Math.abs(dz)
+      if (ox > 0 && oz > 0) {
+        if (ox < oz) p.x = o.x + Math.sign(dx || 1) * (o.hw + pad)
+        else p.z = o.z + Math.sign(dz || 1) * (o.hd + pad)
+      }
+      continue
+    }
+    const dx = p.x - o.x
+    const dz = p.z - o.z
+    const d = Math.hypot(dx, dz)
+    const min = o.r + pad
+    if (d < min && d > 0.0001) {
+      p.x = o.x + (dx / d) * min
+      p.z = o.z + (dz / d) * min
+    }
   }
 }
 
-// lampu jalan & pot pohon di boulevard
-export const lamps = []
-export const planters = []
-for (let z = -4; z > -44; z -= 8) {
-  if (Math.abs(z - CROSS_Z) < 5) continue
-  lamps.push([-AVENUE_HALF + 0.3, z], [AVENUE_HALF - 0.3, z])
-}
-for (let z = -8; z > -42; z -= 10) {
-  if (Math.abs(z - CROSS_Z) < 6) continue
-  planters.push([-2.2, z - 4], [2.2, z - 4])
-}
+export const ACCENTS = ['#ff4f6d', '#5fe0ff', '#ffb35e', '#c58bff', '#4fffb0', '#ff8a3d']
 
-// lingkaran tabrakan {x, z, r, h} (h = tinggi, dipakai kamera)
-export const cityObstacles = []
-lamps.forEach(([x, z]) => cityObstacles.push({ x, z, r: 0.2, h: 5 }))
-planters.forEach(([x, z]) => cityObstacles.push({ x, z, r: 0.95, h: 1 }))
-for (const side of [-1, 1]) {
-  cityObstacles.push({ x: side * 4.05, z: 0, r: 0.8, h: 9.5 }) // pilar torii
-  for (let x = 5.2; x <= 9; x += 0.6) cityObstacles.push({ x: side * x, z: 0, r: 0.45, h: 2.4 }) // pagar
+// titik cerita: kiri-kanan bergantian di pinggir jalan
+export const journeySpots = journey.slice(0, 8).map((j, i) => {
+  const side = i % 2 ? 1 : -1
+  return { ...j, index: i, side, x: side * 3.4, z: -9 - i * 4.1 }
+})
+
+// gedung project: berpasangan kiri-kanan, pintu menghadap jalan
+export const buildingSpots = stations.map((s, i) => {
+  const side = i % 2 === 0 ? -1 : 1
+  const z = -60 - Math.floor(i / 2) * 14
+  return {
+    ...s,
+    index: i,
+    side,
+    z,
+    accent: ACCENTS[i % ACCENTS.length],
+    center: [side * 11.6, z],
+    door: [side * 6.9, z],
+    back: [side * 5.2, 0, z], // titik muncul saat keluar dari gedung
+  }
+})
+
+const rand = rng(11)
+export const sakuraTrees = []
+function tree(x, z, s = 1) {
+  sakuraTrees.push({ x, z, s: s * (0.85 + rand() * 0.3), r: rand() * Math.PI * 2 })
 }
+for (let z = -4; z > -39; z -= 7) {
+  tree(-8 - rand() * 2, z - rand() * 2)
+  tree(8 + rand() * 2, z - 3 - rand() * 2)
+  tree(-13 + rand(), z - 4, 1.1)
+  tree(13 - rand(), z - 1, 1.1)
+}
+tree(-12.5, -45, 1.15); tree(12.5, -46, 1.15); tree(-13.2, -53.5); tree(13.4, -53)
+tree(-6.2, -67.2, 0.85); tree(6.2, -67, 0.85); tree(-6.2, -81, 0.85); tree(6.2, -81.4, 0.85)
+tree(0, -109, 1.5); tree(-7.5, -104, 1.1); tree(7.5, -103.5, 1.1); tree(-12, -97); tree(12, -97.5)
+// di luar gerbang
+tree(-9, 4.5, 1.1); tree(9.5, 4, 1.1); tree(-15, 3, 1.2); tree(15.5, 3.5, 1.2)
 
-// ===================== RUANG GALERI =====================
-// Ruangan diletakkan jauh dari kota (z = 200) supaya tidak saling tabrak.
-export const ROOM = { cx: 0, cz: 200, halfW: 8, halfD: 10, height: 5 }
-export const ROOM_BOUNDS = { minX: -7.3, maxX: 7.3, minZ: ROOM.cz - 9.3, maxZ: ROOM.cz + 9.3 }
-export const ROOM_SPAWN = [0, 0, ROOM.cz + 6]
-export const ROOM_EXIT = [0, ROOM.cz + 8.6]
-export const CITY_RETURN = [0, 0, GALLERY.ring[1] + 3.5]
-export const roomObstacles = [{ x: 0, z: ROOM.cz - 1, r: 1.35, h: 1 }] // bangku di tengah
-
-// posisi foto di dinding: kiri (depan→belakang), belakang, kanan (belakang→depan)
-const slots = [
-  ...[5, 1, -3, -7].map((dz) => ({ x: -ROOM.halfW + 0.06, z: ROOM.cz + dz, rot: Math.PI / 2, nx: 1, nz: 0 })),
-  ...[-4.6, 0, 4.6].map((x) => ({ x, z: ROOM.cz - ROOM.halfD + 0.06, rot: 0, nx: 0, nz: 1 })),
-  ...[-7, -3, 1, 5].map((dz) => ({ x: ROOM.halfW - 0.06, z: ROOM.cz + dz, rot: -Math.PI / 2, nx: -1, nz: 0 })),
+// lentera batu (tōrō)
+export const stoneLanterns = [
+  [-3.1, -2.6], [3.1, -2.6],
+  [-2.3, -40.2], [2.3, -40.2], [-2.3, -53.8], [2.3, -53.8],
+  [-2.4, -67], [2.4, -67], [-2.4, -81], [2.4, -81], [-2.4, -94], [2.4, -94],
+  [-4.8, -98.5], [4.8, -98.5],
 ]
-export const photoSpots = gallery.slice(0, slots.length).map((g, i) => ({ ...g, index: i, ...slots[i] }))
+export const gateLanterns = [[-4.6, 2.8], [4.6, 2.8]]
+
+// lingkaran tabrakan {x, z, r, h} atau kotak {x, z, hw, hd, h} (h = tinggi, dipakai kamera)
+export const gardenObstacles = []
+stoneLanterns.forEach(([x, z]) => gardenObstacles.push({ x, z, r: 0.45, h: 1.9 }))
+sakuraTrees.forEach((t) => { if (t.z < 0) gardenObstacles.push({ x: t.x, z: t.z, r: 0.45 * t.s, h: 2.2 }) })
+journeySpots.forEach((j) => gardenObstacles.push({ x: j.x + j.side * 0.6, z: j.z, r: 0.35, h: 3.6 }))
+buildingSpots.forEach((b) => gardenObstacles.push({ x: b.center[0], z: b.z, hw: 3.6, hd: 4.6, h: 40 }))
+// tepi kolam (kecuali tempat jembatan) + pagar jembatan
+for (let a = 0; a < Math.PI * 2; a += 0.06) {
+  const x = Math.cos(a) * POND.rx
+  const z = POND.z + Math.sin(a) * POND.rz
+  if (Math.abs(x) < BRIDGE.half + 0.4) continue
+  gardenObstacles.push({ x, z, r: 0.5, h: 0.6 })
+}
+for (let z = BRIDGE.z0; z >= BRIDGE.z1; z -= 0.5) {
+  gardenObstacles.push({ x: -BRIDGE.half - 0.1, z, r: 0.12, h: 1.8 }, { x: BRIDGE.half + 0.1, z, r: 0.12, h: 1.8 })
+}
+gardenObstacles.push({ x: CONTACT.character[0], z: CONTACT.character[1], r: 0.6, h: 2 })
+gardenObstacles.push({ x: CONTACT.board[0], z: CONTACT.board[1], hw: 2.1, hd: 0.35, h: 3.4 })
+
+// ===================== RUANGAN DI DALAM GEDUNG =====================
+// Ruangan diletakkan jauh dari taman (z = 200) supaya tidak saling tabrak.
+export const ROOM = { cx: 0, cz: 200, halfW: 7, halfD: 8, height: 4.2 }
+export const ROOM_BOUNDS = { minX: -6.4, maxX: 6.4, minZ: ROOM.cz - 7.4, maxZ: ROOM.cz + 7.6 }
+export const ROOM_SPAWN = [0, 0, ROOM.cz + 5.8]
+export const ROOM_EXIT = [0, ROOM.cz + 7.4]
+export const SCREEN_SPOT = [0, ROOM.cz - 3.2] // berdiri di sini untuk melihat layar project
+
+// furnitur per tema (dipakai untuk tabrakan; posisinya sama dengan Interior.jsx)
+const R = ROOM.cz
+export const roomObstacles = {
+  house: [{ x: 0, z: R - 0.6, hw: 1.7, hd: 0.55, h: 1 }, { x: 0, z: R - 2.6, hw: 0.75, hd: 0.45, h: 0.5 }, { x: 0, z: R - 7.4, hw: 2.4, hd: 0.5, h: 1 }, { x: 5.6, z: R + 0.5, r: 0.6, h: 1.6 }],
+  office: [{ x: 0, z: R - 4.6, hw: 2, hd: 0.85, h: 1 }, { x: -5.6, z: R - 6.6, r: 0.6, h: 1.6 }],
+  apartment: [{ x: -4.8, z: R - 1, hw: 1.6, hd: 2.4, h: 0.8 }, { x: 0, z: R - 7, hw: 1.9, hd: 0.7, h: 1 }],
+  dorm: [{ x: -5.4, z: R - 3, hw: 1.1, hd: 2.2, h: 0.8 }, { x: 5.6, z: R - 5.8, hw: 0.8, hd: 1.4, h: 2.4 }, { x: 0, z: R - 7, hw: 1.6, hd: 0.7, h: 1 }],
+  lab: [{ x: -6.1, z: R - 2, hw: 0.6, hd: 4.6, h: 2.6 }, { x: 0, z: R + 1.5, r: 1.3, h: 1 }],
+  studio: [{ x: 0, z: R - 6.6, hw: 2.4, hd: 0.9, h: 1 }, { x: 4.8, z: R - 1.4, r: 0.8, h: 2 }],
+}
 
 // placeholder kalau src foto kosong
 const placeholderCache = new Map()
@@ -213,18 +251,18 @@ export function photoSrc(item) {
   c.width = 640
   c.height = 440
   const g = c.getContext('2d')
-  const hue = (item.index * 47 + 190) % 360
+  const hue = (item.index * 47 + 320) % 360
   const grad = g.createLinearGradient(0, 0, 640, 440)
-  grad.addColorStop(0, `hsl(${hue}, 45%, 62%)`)
-  grad.addColorStop(1, `hsl(${(hue + 40) % 360}, 50%, 32%)`)
+  grad.addColorStop(0, `hsl(${hue}, 45%, 58%)`)
+  grad.addColorStop(1, `hsl(${(hue + 40) % 360}, 50%, 26%)`)
   g.fillStyle = grad
   g.fillRect(0, 0, 640, 440)
-  g.fillStyle = 'rgba(255,255,255,0.85)'
+  g.fillStyle = 'rgba(255,255,255,0.88)'
   g.font = '600 34px Inter, sans-serif'
   g.textAlign = 'center'
-  g.fillText(`Foto ${item.index + 1}`, 320, 210)
+  g.fillText(`Photo ${item.index + 1}`, 320, 210)
   g.font = '400 20px Inter, sans-serif'
-  g.fillText('ganti di src/data.js', 320, 250)
+  g.fillText('replace it in src/data.js', 320, 250)
   const url = c.toDataURL('image/jpeg', 0.85)
   placeholderCache.set(item.index, url)
   return url

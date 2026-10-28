@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useProgress } from '@react-three/drei'
 import { profile } from '../data'
-import { photoSrc } from '../world'
+import { photoSrc, buildingSpots } from '../world'
 
 function Loader() {
   const { progress, active } = useProgress()
@@ -16,26 +16,68 @@ function Loader() {
   if (gone) return null
   return (
     <div className={`loader ${done ? 'is-done' : ''}`}>
-      <p className="eyebrow">Membangun kota</p>
+      <p className="eyebrow">Planting the garden</p>
       <div className="loader-bar"><span style={{ width: `${progress}%` }} /></div>
       <p className="loader-num">{Math.round(progress)}%</p>
     </div>
   )
 }
 
-function Lightbox({ photo, onClose }) {
+// tutup dengan Esc tanpa ikut keluar dari mode jalan-jalan
+function useEscape(onClose) {
   useEffect(() => {
     const key = (e) => { if (e.key === 'Escape') { e.stopImmediatePropagation(); onClose() } }
     window.addEventListener('keydown', key, true)
     return () => window.removeEventListener('keydown', key, true)
   }, [onClose])
+}
+
+function Lightbox({ photo, onClose }) {
+  useEscape(onClose)
   return (
     <div className="lightbox" onClick={onClose}>
       <figure onClick={(e) => e.stopPropagation()}>
-        <img src={photoSrc(photo)} alt={photo.caption} />
-        <figcaption>{photo.caption}</figcaption>
+        <img src={photoSrc(photo)} alt={photo.title} />
+        <figcaption><b>{photo.year} · {photo.title}</b><br />{photo.text}</figcaption>
       </figure>
-      <button className="btn ghost lightbox-close" onClick={onClose}>Tutup</button>
+      <button className="btn ghost lightbox-close" onClick={onClose}>Close</button>
+    </div>
+  )
+}
+
+function ProjectModal({ project, onClose }) {
+  useEscape(onClose)
+  const n = String(project.index + 1).padStart(2, '0')
+  return (
+    <div className="lightbox" onClick={onClose}>
+      <article className="project-modal" onClick={(e) => e.stopPropagation()} style={{ '--accent': project.accent }}>
+        <p className="mono pm-cat"><span>{n}</span> {project.category}</p>
+        <h3 className="display">{project.title}</h3>
+        <p className="pm-desc">{project.details || project.desc}</p>
+        {project.images?.length > 0 && (
+          <div className="pm-images">
+            {project.images.map((src) => <img key={src} src={src} alt="" />)}
+          </div>
+        )}
+        <div className="pm-row">
+          <div>
+            <p className="mono label">Tech stack</p>
+            <ul className="chips">{project.tech.map((t) => <li key={t}>{t}</li>)}</ul>
+          </div>
+          {project.tools?.length > 0 && (
+            <div>
+              <p className="mono label">Tools</p>
+              <ul className="chips">{project.tools.map((t) => <li key={t}>{t}</li>)}</ul>
+            </div>
+          )}
+        </div>
+        <div className="pm-actions">
+          {project.link
+            ? <a className="btn red" href={project.link} target="_blank" rel="noreferrer">Open project ↗</a>
+            : <span className="mono muted">Link coming soon</span>}
+          <button className="btn ghost" onClick={onClose}>Close <kbd>Esc</kbd></button>
+        </div>
+      </article>
     </div>
   )
 }
@@ -45,23 +87,74 @@ export function ScrollIntro({ canEnter, onEnter }) {
   return (
     <>
       <div className="gate-intro">
-        <p className="eyebrow">Sector 02 · Projects</p>
-        <h2>Selamat datang di kotaku.</h2>
-        <p>Setiap gedung menyimpan satu project atau pengalaman.</p>
-        <div className="scroll-hint"><span />Scroll untuk membuka gerbang</div>
+        <p className="eyebrow"><span className="rule" /> 03 — Projects <span className="jp">· 庭園</span></p>
+        <h2>Enter my garden.</h2>
+        <p>Walk through my journey, step inside each building to explore a project, and say hi at the end of the path.</p>
+        <div className="scroll-hint"><span />Scroll to open the gate</div>
       </div>
       <div className={`enter-cta ${canEnter ? 'show' : ''}`}>
         <button className="btn primary btn-lg" onClick={onEnter} tabIndex={canEnter ? 0 : -1}>
-          Masuk ke Kota <span aria-hidden>→</span>
+          Enter the Garden <span aria-hidden>→</span>
         </button>
-        <p>atau tekan <kbd>Enter</kbd> · kamu yang kendalikan karakternya</p>
+        <p>or press <kbd>Enter</kbd> · you control the character</p>
       </div>
     </>
   )
 }
 
-export default function Overlay({ mode, world, active, photo, fade, canEnter, onEnter, onExit }) {
-  const [zoomed, setZoomed] = useState(null)
+function FocusCard({ focus, onPhoto, onOpenProject }) {
+  if (!focus) return null
+  const { type, data } = focus
+  if (type === 'story') {
+    return (
+      <button className="photo-card glass" onClick={() => onPhoto(data)}>
+        <img src={photoSrc(data)} alt="" />
+        <span>
+          <small className="mono">My journey · {data.year}</small>
+          <b>{data.title}</b>
+          <small>Click to view the photo</small>
+        </span>
+      </button>
+    )
+  }
+  if (type === 'door') {
+    return (
+      <div className="toast glass toast-static" style={{ '--accent': data.accent }}>
+        <span className="mono">{String(data.index + 1).padStart(2, '0')} · {data.category}</span>
+        <b>{data.title}</b> — step into the glowing circle to go inside.
+      </div>
+    )
+  }
+  if (type === 'screen') {
+    return (
+      <button className="btn primary open-link" onClick={onOpenProject}>
+        Open {data.title} <kbd>E</kbd>
+      </button>
+    )
+  }
+  if (type === 'contact') {
+    return (
+      <div className="contact-card glass">
+        <p className="mono label">Contact me · お問い合わせ</p>
+        <ul>
+          {profile.contacts.map((c) => (
+            <li key={c.label}>
+              <span className="mono">{c.label}</span>
+              {c.href && c.href !== '#'
+                ? <a href={c.href} target="_blank" rel="noreferrer">{c.text} ↗</a>
+                : <span>{c.text}</span>}
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+  return null
+}
+
+export default function Overlay({ mode, world, focus, modal, fade, canEnter, onEnter, onExit, onOpenProject, onCloseModal }) {
+  const [photo, setPhoto] = useState(null)
+  const project = buildingSpots.find((b) => b.id === world)
 
   return (
     <div className="ui">
@@ -74,41 +167,31 @@ export default function Overlay({ mode, world, active, photo, fade, canEnter, on
         <>
           <div className="hud-brand glass">
             <strong>{profile.name}</strong>
-            <span>{world === 'room' ? 'Galeri Kegiatan' : 'Kota Project'}</span>
+            <span>{project ? `${project.category} · inside` : 'The Garden · 庭園'}</span>
           </div>
 
-          <button className="btn ghost hud-exit glass" onClick={onExit}>Keluar <kbd>Esc</kbd></button>
+          <button className="btn ghost hud-exit glass" onClick={onExit}>Exit <kbd>Esc</kbd></button>
 
           <div className="hud-keys glass">
-            <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> jalan</span>
-            <span><kbd>Shift</kbd> lari</span>
-            <span><kbd>Drag</kbd> putar kamera</span>
+            <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk</span>
+            <span><kbd>Shift</kbd> run</span>
+            <span><kbd>Drag</kbd> look around</span>
             <span><kbd>Scroll</kbd> zoom</span>
           </div>
 
-          {world === 'city' && !active && (
-            <div className="toast glass">Berdiri di lingkaran depan gedung untuk melihat project. Gedung <b>GALERI</b> ada di ujung jalan.</div>
+          {!project && !focus && (
+            <div className="toast glass">Follow the stone path: my journey comes first, then step into a building to explore a project. Say hi at the end!</div>
+          )}
+          {project && focus?.type === 'room' && (
+            <div className="toast glass">Walk to the glowing screen and click it to open the project. The frames show the tools I used.</div>
           )}
 
-          {world === 'city' && active?.link && (
-            <a className="btn primary open-link" href={active.link} target="_blank" rel="noreferrer">
-              Buka {active.title} ↗
-            </a>
-          )}
-
-          {world === 'room' && photo && (
-            <button className="photo-card glass" onClick={() => setZoomed(photo)}>
-              <img src={photoSrc(photo)} alt="" />
-              <span>
-                <b>{photo.caption}</b>
-                <small>Klik untuk perbesar</small>
-              </span>
-            </button>
-          )}
+          <FocusCard focus={focus} onPhoto={setPhoto} onOpenProject={onOpenProject} />
         </>
       )}
 
-      {zoomed && <Lightbox photo={zoomed} onClose={() => setZoomed(null)} />}
+      {photo && <Lightbox photo={photo} onClose={() => setPhoto(null)} />}
+      {modal && project && <ProjectModal project={project} onClose={onCloseModal} />}
     </div>
   )
 }

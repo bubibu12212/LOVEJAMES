@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { profile, stations } from '../data'
+import { profile } from '../data'
 import About3D from './About3D'
 import TokyoHero from './TokyoHero'
 import { IsoBuilding, TowerArt } from './Illustrations'
@@ -83,7 +83,7 @@ export function About() {
         ) : (
           <div className="portrait">
             {profile.photo ? <img src={profile.photo} alt={profile.name} onError={(e) => { e.currentTarget.style.display = 'none' }} /> : null}
-            <span className="portrait-fallback mono">Taruh fotomu di<br />public/photo.jpg</span>
+            <span className="portrait-fallback mono">Add your photo at<br />public/photo.jpg</span>
           </div>
         )}
         <p className="caption mono">{profile.name} · 写真</p>
@@ -103,36 +103,6 @@ export function About() {
         </ul>
       </div>
     </section>
-  )
-}
-
-export function ProjectsGrid() {
-  return (
-    <div className="projects-head">
-      <div className="grid-lines" aria-hidden><i /><i /><i /></div>
-      <div className="projects-title">
-        <div>
-          <Eyebrow no="03" en="Selected works" jp="作品" />
-          <h2 className="display big">Projects<span className="dot-red">.</span></h2>
-        </div>
-        <p className="lead">A few things I&apos;ve built while studying and exploring. Each one is a building in my city — scroll down to walk through it.</p>
-      </div>
-      <div className="cards">
-        {stations.map((s, i) => (
-          <article key={s.id} className="card">
-            <div className="card-art"><IsoBuilding kind={s.building} /></div>
-            <div className="card-body">
-              <p className="mono card-cat"><span>{String(i + 1).padStart(2, '0')}</span> {s.category}</p>
-              <h3>{s.title}</h3>
-              <p>{s.desc}</p>
-              {s.link
-                ? <a className="mono card-link" href={s.link} target="_blank" rel="noreferrer">View project ↗</a>
-                : <span className="mono card-link muted">View project →</span>}
-            </div>
-          </article>
-        ))}
-      </div>
-    </div>
   )
 }
 

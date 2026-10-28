@@ -126,27 +126,7 @@ body.locked .nav { display: none; }
 
 /* ---------- projects ---------- */
 .projects { position: relative; background: var(--bg); }
-.projects-head { position: relative; padding: clamp(96px, 14vh, 150px) var(--gutter) 80px; overflow: hidden; }
-.projects-head > *:not(.grid-lines) { position: relative; }
-.projects-title { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; flex-wrap: wrap; margin-bottom: 44px; }
-.display.big { font-size: clamp(72px, 12vw, 180px); }
-.projects-title .lead { max-width: 40ch; margin: 0; }
-.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.card {
-  display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 16px; padding: 16px;
-  background: var(--panel); border: 1px solid var(--line); transition: border-color 0.25s, transform 0.25s;
-}
-.card:hover { border-color: rgba(255, 59, 47, 0.6); transform: translateY(-3px); }
-.card-art { background: radial-gradient(circle at 50% 70%, #232327, #18181a 70%); display: grid; place-items: center; height: 132px; overflow: hidden; }
-.card-art .iso { width: 100%; height: 120px; transition: transform 0.4s; }
-.card:hover .iso { transform: translateY(-4px) scale(1.04); }
-.card-cat { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin: 2px 0 8px; }
-.card-cat span { color: var(--red-2); margin-right: 6px; }
-.card h3 { margin: 0 0 8px; font: 600 17px var(--sans); }
-.card-body p:not(.card-cat) { margin: 0 0 12px; font-size: 12.5px; line-height: 1.55; color: #a8a29a; }
-.card-link { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; text-decoration: none; }
-
-.gate-section { position: relative; height: 220vh; }
+.gate-section { position: relative; height: 240vh; }
 .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: #08080a; --p: 0; }
 .stage.is-explore { position: fixed; inset: 0; height: auto; z-index: 60; }
 .stage canvas { touch-action: none; }
@@ -217,6 +197,40 @@ body.dragging .stage canvas { cursor: grabbing; }
 .lightbox img { max-width: 100%; max-height: 74vh; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); }
 .lightbox figcaption { margin-top: 14px; color: #dcd5ca; font-size: 15px; }
 .lightbox-close { position: absolute; top: 18px; right: 18px; }
+/* toast yang tetap tampil selama pemain di dekat sesuatu */
+.toast-static { animation: rise 0.35s ease both; opacity: 1; border-left: 3px solid var(--accent, var(--red-2)); }
+.toast-static .mono { display: block; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent, var(--red-2)); margin-bottom: 2px; }
+.photo-card small.mono { color: #ff7eb6; letter-spacing: 0.14em; text-transform: uppercase; font-size: 10px; }
+.lightbox figcaption b { color: var(--ink); }
+
+/* papan kontak di ujung taman */
+.contact-card {
+  position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); width: min(420px, calc(100% - 36px));
+  padding: 14px 18px; animation: rise 0.35s ease both; pointer-events: auto; border-left: 3px solid #ff7eb6;
+}
+.contact-card .label { color: #ff7eb6; margin-bottom: 6px; }
+.contact-card ul { list-style: none; margin: 0; padding: 0; }
+.contact-card li { display: grid; grid-template-columns: 80px 1fr; padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.contact-card li .mono { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); align-self: center; }
+.contact-card a { text-decoration: none; }
+.contact-card a:hover { color: #ff7eb6; }
+
+/* jendela detail project */
+.project-modal {
+  width: min(760px, 100%); max-height: calc(100% - 40px); overflow: auto; padding: clamp(22px, 4vw, 40px);
+  background: #0f1013; border: 1px solid var(--line); border-top: 3px solid var(--accent, var(--red-2));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6); animation: pop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+.pm-cat { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+.pm-cat span { color: var(--accent, var(--red-2)); margin-right: 8px; }
+.project-modal h3 { font-size: clamp(40px, 6vw, 72px); margin-bottom: 16px; }
+.pm-desc { color: #c4bdb2; line-height: 1.75; font-size: 15px; margin: 0 0 22px; }
+.pm-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-bottom: 22px; }
+.pm-images img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border: 1px solid var(--line); }
+.pm-row { display: flex; flex-wrap: wrap; gap: 24px 40px; margin-bottom: 26px; }
+.pm-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid var(--line); }
+@keyframes pop { from { opacity: 0; transform: scale(0.94) translateY(10px); } to { opacity: 1; transform: none; } }
+
 @keyframes rise { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
 
@@ -237,22 +251,18 @@ body.dragging .stage canvas { cursor: grabbing; }
 .skyline .iso { flex: 0 0 auto; }
 .copy { margin: 0; padding: 22px 0 28px; font-size: 10px; letter-spacing: 0.15em; color: var(--muted); border-top: 1px solid var(--line); text-transform: uppercase; }
 
-@media (max-width: 1100px) {
-  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
 @media (max-width: 820px) {
   .about, .contact-main { grid-template-columns: 1fr; }
   .about-visual { margin: 0 auto; max-width: 360px; }
-  .cards { grid-template-columns: 1fr; }
   .nav-status { display: none; }
   .nav-links a .mono { display: none; }
   .hero-shade { background: linear-gradient(0deg, rgba(11, 11, 12, 0.9) 10%, rgba(11, 11, 12, 0.45) 60%, rgba(11, 11, 12, 0.2)); }
   .tower-art { justify-self: center; max-width: 300px; }
-  .toast { top: 74px; width: calc(100% - 36px); }
+  .toast { top: 112px; width: calc(100% - 36px); }
   .facts { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 1000px) {
-  .photo-card, .open-link { bottom: 96px; }
+  .photo-card, .open-link, .contact-card { bottom: 96px; }
 }
 @media (max-width: 520px) {
   .nav-links { gap: 12px; }

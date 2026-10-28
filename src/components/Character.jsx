@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGLTF, useAnimations, useKeyboardControls } from '@react-three/drei'
 import * as THREE from 'three'
-import { camState, PLAYER_START } from '../world'
+import { camState, PLAYER_START, groundY, pushOut } from '../world'
 
 const SPEED = 3.2
 const RUN_SPEED = 6
@@ -111,17 +111,8 @@ export default function Character({ playerRef, enabled, bounds, obstacles }) {
       g.position.x = THREE.MathUtils.clamp(g.position.x, bounds.minX, bounds.maxX)
       g.position.z = THREE.MathUtils.clamp(g.position.z, bounds.minZ, bounds.maxZ)
 
-      // tabrakan dengan lampu, pot, tembok, pilar, bangku
-      for (const o of obstacles) {
-        const dx = g.position.x - o.x
-        const dz = g.position.z - o.z
-        const d = Math.hypot(dx, dz)
-        const min = o.r + 0.35
-        if (d < min && d > 0.0001) {
-          g.position.x = o.x + (dx / d) * min
-          g.position.z = o.z + (dz / d) * min
-        }
-      }
+      // tabrakan: lingkaran {r} atau kotak {hw, hd}
+      pushOut(g.position, obstacles, 0.35)
       target = Math.atan2(dir.x, dir.z) + MODEL_FACING
     }
 
@@ -143,6 +134,9 @@ export default function Character({ playerRef, enabled, bounds, obstacles }) {
       armL.rotation.x = -swing * ARM_SWING
       armR.rotation.x = swing * ARM_SWING
     }
+
+    // ikut tinggi tanah (jembatan)
+    g.position.y = THREE.MathUtils.damp(g.position.y, groundY(g.position.x, g.position.z), 12, dt)
 
     // badan naik-turun tiap langkah, dan bernapas pelan saat diam
     const t = state.clock.elapsedTime

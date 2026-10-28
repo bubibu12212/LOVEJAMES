@@ -82,6 +82,43 @@ function ProjectModal({ project, onClose }) {
   )
 }
 
+function ContactRowHtml({ c }) {
+  const [copied, setCopied] = useState(false)
+  const live = c.href && c.href !== '#'
+  const copy = () => {
+    navigator.clipboard?.writeText(c.text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    })
+  }
+  return (
+    <li>
+      <span className="mono">{c.label}</span>
+      {live ? <a href={c.href} target="_blank" rel="noreferrer">{c.text} ↗</a> : <span>{c.text}</span>}
+      <button className="btn ghost cm-copy" onClick={copy}>{copied ? 'Copied ✓' : 'Copy'}</button>
+    </li>
+  )
+}
+
+function ContactModal({ onClose }) {
+  useEscape(onClose)
+  const email = profile.contacts.find((c) => c.label.toLowerCase() === 'email')
+  return (
+    <div className="lightbox" onClick={onClose}>
+      <article className="project-modal contact-modal" onClick={(e) => e.stopPropagation()} style={{ '--accent': '#ff7eb6' }}>
+        <p className="mono pm-cat"><span>✿</span> Get in touch · お問い合わせ</p>
+        <h3 className="display">Contact me</h3>
+        <p className="pm-desc">Open to opportunities, collaborations, or just a friendly chat. Pick whatever works best for you.</p>
+        <ul className="cm-list">{profile.contacts.map((c) => <ContactRowHtml key={c.label} c={c} />)}</ul>
+        <div className="pm-actions">
+          {email && email.href !== '#' && <a className="btn red" href={email.href}>Send an email ↗</a>}
+          <button className="btn ghost" onClick={onClose}>Close <kbd>Esc</kbd></button>
+        </div>
+      </article>
+    </div>
+  )
+}
+
 // teks di atas gerbang selama mode scroll (opacity diatur lewat CSS var --p)
 export function ScrollIntro({ canEnter, onEnter }) {
   return (
@@ -102,7 +139,7 @@ export function ScrollIntro({ canEnter, onEnter }) {
   )
 }
 
-function FocusCard({ focus, onPhoto, onOpenProject }) {
+function FocusCard({ focus, onPhoto, onOpenProject, onOpenContact }) {
   if (!focus) return null
   const { type, data } = focus
   if (type === 'story') {
@@ -146,13 +183,14 @@ function FocusCard({ focus, onPhoto, onOpenProject }) {
             </li>
           ))}
         </ul>
+        <button className="btn red cc-open" onClick={onOpenContact}>Contact me →</button>
       </div>
     )
   }
   return null
 }
 
-export default function Overlay({ mode, world, focus, modal, fade, canEnter, onEnter, onExit, onOpenProject, onCloseModal }) {
+export default function Overlay({ mode, world, focus, modal, fade, canEnter, onEnter, onExit, onOpenProject, onCloseModal, contactOpen, onOpenContact, onCloseContact }) {
   const [photo, setPhoto] = useState(null)
   const project = buildingSpots.find((b) => b.id === world)
 
@@ -186,12 +224,13 @@ export default function Overlay({ mode, world, focus, modal, fade, canEnter, onE
             <div className="toast glass">Walk to the glowing screen and click it to open the project. The frames show the tools I used.</div>
           )}
 
-          <FocusCard focus={focus} onPhoto={setPhoto} onOpenProject={onOpenProject} />
+          <FocusCard focus={focus} onPhoto={setPhoto} onOpenProject={onOpenProject} onOpenContact={onOpenContact} />
         </>
       )}
 
       {photo && <Lightbox photo={photo} onClose={() => setPhoto(null)} />}
       {modal && project && <ProjectModal project={project} onClose={onCloseModal} />}
+      {contactOpen && <ContactModal onClose={onCloseContact} />}
     </div>
   )
 }

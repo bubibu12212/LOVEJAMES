@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { profile } from '../data'
 import About3D from './About3D'
 import TokyoHero from './TokyoHero'
@@ -106,31 +106,98 @@ export function About() {
   )
 }
 
+// tambah class "in" sekali saat elemen mulai terlihat (untuk animasi muncul)
+function useReveal(threshold = 0.2) {
+  const ref = useRef()
+  const [shown, setShown] = useState(false)
+  useEffect(() => {
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setShown(true); io.disconnect() }
+    }, { threshold })
+    io.observe(ref.current)
+    return () => io.disconnect()
+  }, [threshold])
+  return [ref, shown]
+}
+
+function ContactItem({ c, i }) {
+  const [copied, setCopied] = useState(false)
+  const live = c.href && c.href !== '#'
+  const copy = (e) => {
+    if (live) return
+    e.preventDefault()
+    const done = () => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1600)
+    }
+    // cadangan untuk browser yang menolak akses clipboard
+    const fallback = () => {
+      const t = document.createElement('textarea')
+      t.value = c.text
+      document.body.appendChild(t)
+      t.select()
+      document.execCommand('copy')
+      t.remove()
+      done()
+    }
+    if (navigator.clipboard) navigator.clipboard.writeText(c.text).then(done, fallback)
+    else fallback()
+  }
+  return (
+    <li className="rv" style={{ '--d': `${0.45 + i * 0.1}s` }}>
+      <a href={live ? c.href : '#contact'} target={live ? '_blank' : undefined} rel="noreferrer" onClick={copy}>
+        <span className="mono">{c.label}</span>
+        <span className="ci-text">{c.text}</span>
+        <span className="ci-act mono">{copied ? 'Copied ✓' : live ? 'Open' : 'Copy'}</span>
+        <b>↗</b>
+      </a>
+    </li>
+  )
+}
+
 export function Contact() {
   const kinds = ['glass', 'apartment', 'green', 'shop', 'wooden', 'villa', 'glass', 'apartment']
+  const [ref, shown] = useReveal(0.15)
+  const art = useRef()
+  // menara & matahari sedikit mengikuti mouse (paralaks)
+  const onMove = (e) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    art.current.style.setProperty('--mx', ((e.clientX - r.left) / r.width - 0.5).toFixed(3))
+    art.current.style.setProperty('--my', ((e.clientY - r.top) / r.height - 0.5).toFixed(3))
+  }
+  const title = ["Let's", 'work', 'together']
   return (
-    <footer className="contact" id="contact">
+    <footer className={`contact ${shown ? 'in' : ''}`} id="contact" ref={ref} onMouseMove={onMove}>
       <div className="grid-lines" aria-hidden><i /><i /><i /></div>
+      <div className="petals" aria-hidden>{Array.from({ length: 14 }, (_, i) => <i key={i} style={{ '--i': i }} />)}</div>
       <div className="contact-main">
         <div>
-          <Eyebrow no="04" en="Contact" jp="お問い合わせ" />
-          <h2 className="display">Let&apos;s work<br />together</h2>
-          <p className="jp-red">一緒に作りましょう</p>
-          <ul className="contact-list">
-            {profile.contacts.map((c) => (
-              <li key={c.label}>
-                <span className="mono">{c.label}</span>
-                {c.href && c.href !== '#'
-                  ? <a href={c.href} target="_blank" rel="noreferrer">{c.text}<b>↗</b></a>
-                  : <span>{c.text}<b>↗</b></span>}
-              </li>
+          <div className="rv" style={{ '--d': '0s' }}><Eyebrow no="04" en="Contact" jp="お問い合わせ" /></div>
+          <h2 className="display contact-title">
+            {title.map((w, i) => (
+              <Fragment key={w}>
+                <span className="word"><span style={{ '--d': `${0.08 + i * 0.12}s` }}>{w}</span></span>
+                {i === 1 ? <br /> : ' '}
+              </Fragment>
             ))}
+          </h2>
+          <p className="jp-red">
+            {[...'一緒に作りましょう'].map((ch, i) => <span key={i} style={{ '--d': `${0.4 + i * 0.05}s` }}>{ch}</span>)}
+          </p>
+          <ul className="contact-list">
+            {profile.contacts.map((c, i) => <ContactItem key={c.label} c={c} i={i} />)}
           </ul>
         </div>
-        <TowerArt />
+        <div className="tower-wrap" ref={art}>
+          <TowerArt />
+        </div>
       </div>
       <div className="skyline" aria-hidden>
-        {kinds.map((k, i) => <IsoBuilding key={i} kind={k} height={70 + (i % 3) * 14} />)}
+        {kinds.map((k, i) => (
+          <span key={i} className="sky-b" style={{ '--d': `${0.3 + i * 0.07}s` }}>
+            <IsoBuilding kind={k} height={70 + (i % 3) * 14} />
+          </span>
+        ))}
       </div>
       <p className="copy mono">© {new Date().getFullYear()} {profile.name} · Made with three.js</p>
     </footer>

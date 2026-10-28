@@ -60,7 +60,7 @@ function NightSky() {
         <sphereGeometry args={[350, 32, 16]} />
       </mesh>
       <Stars radius={300} depth={40} count={1400} factor={5} fade speed={0.3} />
-      <group position={[70, 95, -260]}>
+      <group position={[150, 80, -240]}>
         <mesh>
           <circleGeometry args={[9, 48]} />
           <meshBasicMaterial color="#fff1e4" toneMapped={false} fog={false} />
@@ -112,7 +112,7 @@ function useOrbitControls(enabled) {
 // mode: 'scroll' (kamera digerakkan scroll halaman) | 'explore' (bebas jalan)
 // world: 'garden' | id project (di dalam gedung)
 // onFocus({ type: 'story' | 'door' | 'contact' | 'screen', data }) = hal di dekat pemain (untuk HUD)
-export default function Scene({ mode, world, progressRef, onFocus, onWorldSwitch, onOpenProject }) {
+export default function Scene({ mode, world, progressRef, onFocus, onWorldSwitch, onOpenProject, onOpenContact }) {
   const player = useRef()
   const light = useRef()
   const playerLight = useRef()
@@ -203,7 +203,7 @@ export default function Scene({ mode, world, progressRef, onFocus, onWorldSwitch
       const s = !inRoom && journeySpots[story.current]
       focus.current = THREE.MathUtils.damp(focus.current, s ? 1 : 0, 3, dt)
       const f = focus.current
-      if (s) focusPos.set(s.x - s.side * 0.6, 2.6, s.z)
+      if (s) focusPos.set(s.x - s.side * 0.6, 2.2, s.z)
       const { yaw } = camState
       let pitch = camState.pitch + f * Math.max(0, 0.22 - camState.pitch)
       let dist = camState.dist + f * Math.max(0, 7.5 - camState.dist)
@@ -318,7 +318,7 @@ export default function Scene({ mode, world, progressRef, onFocus, onWorldSwitch
         <GardenGate openRef={gateOpen} />
         <Journey activeRef={story} />
         <Buildings nearRef={door} />
-        <ContactSpot activeRef={contact} />
+        <ContactSpot activeRef={contact} onOpen={onOpenContact} />
       </group>
 
       {inRoom && <Interior project={project} nearRef={screen} onOpen={onOpenProject} />}

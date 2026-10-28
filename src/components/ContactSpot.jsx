@@ -58,22 +58,23 @@ function Host({ activeRef }) {
   )
 }
 
-function ContactRow({ c, y }) {
+function ContactRow({ c, y, onOpen }) {
   const live = c.href && c.href !== '#'
   const open = (e) => {
     e.stopPropagation()
     if (live) window.open(c.href, '_blank', 'noopener')
+    else onOpen()
   }
   return (
     <group position={[-BW / 2 + 0.35, y, 0.06]}>
       <mesh
         position={[BW / 2 - 0.35, 0, -0.005]}
         onClick={open}
-        onPointerOver={() => { if (live) document.body.style.cursor = 'pointer' }}
+        onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer' }}
         onPointerOut={() => { document.body.style.cursor = '' }}
       >
         <planeGeometry args={[BW - 0.7, 0.32]} />
-        <meshBasicMaterial color="#ffffff" transparent opacity={0.04} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       <Text fontSize={0.085} letterSpacing={0.25} color={PINK} anchorX="left" anchorY="middle">{c.label.toUpperCase()}</Text>
       <Text position={[0.95, 0, 0]} fontSize={0.15} color="#f4f1ec" anchorX="left" anchorY="middle">{c.text}</Text>
@@ -87,7 +88,7 @@ function ContactRow({ c, y }) {
 }
 
 // papan kontak: kaca buram dengan rangka kayu gelap & atap kecil
-function Board({ activeRef }) {
+function Board({ activeRef, onOpen }) {
   const edge = useRef()
   useFrame((state, dt) => {
     const on = activeRef.current
@@ -104,8 +105,13 @@ function Board({ activeRef }) {
       ))}
       <B p={[0, 3.45, 0]} s={[BW + 0.9, 0.14, 0.42]} c="#1d1f23" r={0.5} />
       <B p={[0, 3.3, 0]} s={[BW + 0.5, 0.12, 0.22]} c="#2a1d14" />
-      {/* kaca buram */}
-      <mesh position={[0, 1.85, 0]}>
+      {/* kaca buram (klik = buka jendela kontak) */}
+      <mesh
+        position={[0, 1.85, 0]}
+        onClick={(e) => { e.stopPropagation(); onOpen() }}
+        onPointerOver={() => { document.body.style.cursor = 'pointer' }}
+        onPointerOut={() => { document.body.style.cursor = '' }}
+      >
         <boxGeometry args={[BW, BH, 0.06]} />
         <meshStandardMaterial color="#120e16" transparent opacity={0.85} roughness={0.2} metalness={0.3} />
       </mesh>
@@ -123,13 +129,16 @@ function Board({ activeRef }) {
         <Text position={[-BW / 2 + 0.35, BH / 2 - 1.02, 0.05]} fontSize={0.12} color="#c9c1d1" anchorX="left" anchorY="middle">
           {"Let's build something together."}
         </Text>
-        {rows.map((c, i) => <ContactRow key={c.label} c={c} y={-0.05 - i * 0.36} />)}
+        {rows.map((c, i) => <ContactRow key={c.label} c={c} y={-0.05 - i * 0.36} onOpen={onOpen} />)}
+        <Text position={[BW / 2 - 0.35, -BH / 2 + 0.2, 0.05]} fontSize={0.075} letterSpacing={0.3} color={CYAN} anchorX="right" anchorY="middle">
+          CLICK THE BOARD TO CONTACT ME ▸
+        </Text>
       </group>
     </group>
   )
 }
 
-export default function ContactSpot({ activeRef }) {
+export default function ContactSpot({ activeRef, onOpen }) {
   const spot = useRef()
   const target = useRef()
   useFrame(() => {
@@ -138,7 +147,7 @@ export default function ContactSpot({ activeRef }) {
   return (
     <group>
       <Host activeRef={activeRef} />
-      <Board activeRef={activeRef} />
+      <Board activeRef={activeRef} onOpen={onOpen} />
       {/* lampu sorot dari atas ke karakter & papan */}
       <spotLight ref={spot} position={[CONTACT.x, 7, CONTACT.z - 0.5]} angle={0.6} penumbra={0.7} intensity={70} distance={16} decay={1.5} color="#ffe6f0" castShadow={false} />
       <object3D ref={target} position={[CONTACT.x, 0.8, CONTACT.board[1]]} />

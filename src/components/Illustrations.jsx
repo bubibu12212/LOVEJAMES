@@ -72,18 +72,22 @@ export function TowerArt() {
     const y1 = y0 - 13
     const w = (y) => 6 + 70 * Math.pow((y - 40) / 340, 2.2)
     const c = Math.floor(i / 3) % 2 ? '#f1ebe1' : '#ff4a1c'
-    legs.push(<path key={i} d={`M${150 - w(y0)},${y0} L${150 - w(y1)},${y1} M${150 + w(y0)},${y0} L${150 + w(y1)},${y1} M${150 - w(y0)},${y0} L${150 + w(y1)},${y1} M${150 + w(y0)},${y0} L${150 - w(y1)},${y1} M${150 - w(y0)},${y0} L${150 + w(y0)},${y0}`} stroke={c} strokeWidth={i < 6 ? 2.4 : 1.6} />)
+    legs.push(<path key={i} pathLength="1" className="draw" style={{ '--i': i }} d={`M${150 - w(y0)},${y0} L${150 - w(y1)},${y1} M${150 + w(y0)},${y0} L${150 + w(y1)},${y1} M${150 - w(y0)},${y0} L${150 + w(y1)},${y1} M${150 + w(y0)},${y0} L${150 - w(y1)},${y1} M${150 - w(y0)},${y0} L${150 + w(y0)},${y0}`} stroke={c} strokeWidth={i < 6 ? 2.4 : 1.6} />)
   }
   return (
     <svg viewBox="0 0 300 400" className="tower-art" aria-hidden>
-      <circle cx="160" cy="190" r="138" fill="#c9231b" />
-      <g fill="none">{legs}</g>
-      <rect x="112" y="205" width="76" height="16" fill="#e9e3d9" />
-      <rect x="114" y="208" width="72" height="5" fill="#ffcf8f" />
-      <rect x="132" y="112" width="36" height="10" fill="#e9e3d9" />
-      <rect x="133" y="114" width="34" height="3" fill="#ffcf8f" />
-      <rect x="148" y="10" width="4" height="40" fill="#f1ebe1" />
-      <circle cx="150" cy="9" r="3" fill="#ff3b2f" />
+      <circle className="art-sun" cx="160" cy="190" r="138" fill="#c9231b" />
+      <g className="art-tower">
+        <g fill="none">{legs}</g>
+        <g className="art-deck">
+          <rect x="112" y="205" width="76" height="16" fill="#e9e3d9" />
+          <rect x="114" y="208" width="72" height="5" fill="#ffcf8f" />
+          <rect x="132" y="112" width="36" height="10" fill="#e9e3d9" />
+          <rect x="133" y="114" width="34" height="3" fill="#ffcf8f" />
+          <rect x="148" y="10" width="4" height="40" fill="#f1ebe1" />
+        </g>
+        <circle className="art-beacon" cx="150" cy="9" r="3" fill="#ff3b2f" />
+      </g>
     </svg>
   )
 }

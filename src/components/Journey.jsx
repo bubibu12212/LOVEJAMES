@@ -4,9 +4,9 @@ import { Text } from '@react-three/drei'
 import * as THREE from 'three'
 import { journeySpots, photoSrc } from '../world'
 
-const PW = 2.7      // lebar foto
-const PH = 1.8      // tinggi foto
-const PANEL_Y = 2.75
+const PW = 2.5      // lebar foto
+const PH = 1.66      // tinggi foto
+const PANEL_Y = 2.45
 const HOLO = '#7fe8ff'
 const PINK = '#ff7eb6'
 const worldPos = new THREE.Vector3()
@@ -73,7 +73,7 @@ function Station({ spot, activeRef }) {
     const g = panel.current
     g.visible = a.s > 0.001
     g.scale.set(Math.max(a.s, 0.0001), Math.max(Math.min(a.s * 1.4, a.s + 0.1), 0.0001), 1)
-    g.position.y = PANEL_Y + Math.sin(t * 1.4 + spot.index) * 0.05
+    g.position.y = Math.sin(t * 1.4 + spot.index) * 0.05
 
     // panel selalu menghadap kamera (hanya putar kiri-kanan)
     g.getWorldPosition(worldPos)

@@ -109,6 +109,7 @@ body.locked .nav { display: none; }
   align-items: center; padding: clamp(96px, 14vh, 160px) var(--gutter); background: var(--bg-2); overflow: hidden;
 }
 .about > *:not(.grid-lines) { position: relative; }
+.about::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 220px; pointer-events: none; background: linear-gradient(180deg, transparent, #120e22); }
 .about-visual { position: relative; aspect-ratio: 4 / 5; max-width: 460px; width: 100%; }
 .about-visual .sun { position: absolute; width: 74%; aspect-ratio: 1; border-radius: 50%; background: var(--red); right: -8%; top: 8%; }
 .portrait { position: absolute; inset: 0 14% 6% 0; background: linear-gradient(180deg, #1d1d20, #121214); overflow: hidden; display: grid; place-items: center; }
@@ -129,6 +130,11 @@ body.locked .nav { display: none; }
 .gate-section { position: relative; height: 240vh; }
 .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: #08080a; --p: 0; }
 .stage.is-explore { position: fixed; inset: 0; height: auto; z-index: 60; }
+/* gradasi supaya About menyambung mulus ke langit taman, lalu ke Contact */
+.stage::before, .stage::after { content: ''; position: absolute; left: 0; right: 0; pointer-events: none; z-index: 1; transition: opacity 0.4s; }
+.stage::before { top: 0; height: 34vh; background: linear-gradient(180deg, #120e22 0%, rgba(18, 14, 34, 0.6) 45%, transparent); opacity: calc(1 - var(--p) * 1.4); }
+.stage::after { bottom: 0; height: 22vh; background: linear-gradient(0deg, var(--bg-2), transparent); opacity: calc(var(--p) * 1.6 - 0.4); }
+.stage.is-explore::before, .stage.is-explore::after { opacity: 0; }
 .stage canvas { touch-action: none; }
 body.can-drag .stage canvas { cursor: grab; }
 body.dragging .stage canvas { cursor: grabbing; }
@@ -215,6 +221,16 @@ body.dragging .stage canvas { cursor: grabbing; }
 .contact-card a { text-decoration: none; }
 .contact-card a:hover { color: #ff7eb6; }
 
+/* jendela kontak */
+.cc-open { margin-top: 10px; width: 100%; justify-content: center; }
+.cm-list { list-style: none; margin: 0 0 22px; padding: 0; }
+.cm-list li { display: grid; grid-template-columns: 90px 1fr auto; align-items: center; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); font-size: 15px; }
+.cm-list li:last-child { border-bottom: 1px solid var(--line); }
+.cm-list .mono { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+.cm-list a { text-decoration: none; }
+.cm-list a:hover { color: var(--accent); }
+.cm-copy { padding: 8px 12px; font-size: 11px; }
+
 /* jendela detail project */
 .project-modal {
   width: min(760px, 100%); max-height: calc(100% - 40px); overflow: auto; padding: clamp(22px, 4vw, 40px);
@@ -240,15 +256,72 @@ body.dragging .stage canvas { cursor: grabbing; }
 .contact-main { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 40px; align-items: center; }
 .contact h2 { font-size: clamp(64px, 9vw, 140px); }
 .jp-red { font: 500 18px var(--jp); color: var(--red-2); margin: 16px 0 28px; letter-spacing: 0.1em; }
-.contact-list { list-style: none; padding: 0; margin: 0; max-width: 480px; }
-.contact-list li { display: grid; grid-template-columns: 90px 1fr; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
-.contact-list .mono { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
-.contact-list a, .contact-list li > span:last-child { display: flex; justify-content: space-between; text-decoration: none; font-size: 14px; }
-.contact-list b { color: var(--red-2); font-weight: 400; }
-.contact-list a:hover { color: var(--red-2); }
-.tower-art { width: 100%; max-width: 420px; justify-self: end; }
-.skyline { display: flex; align-items: flex-end; justify-content: space-between; gap: 6px; margin-top: 50px; overflow: hidden; opacity: 0.9; }
-.skyline .iso { flex: 0 0 auto; }
+.contact-list { list-style: none; padding: 0; margin: 0; max-width: 520px; }
+.contact-list li { border-bottom: 1px solid var(--line); }
+.contact-list a {
+  position: relative; display: grid; grid-template-columns: 90px 1fr auto 18px; align-items: center; gap: 10px;
+  padding: 16px 12px 16px 0; text-decoration: none; font-size: 15px; overflow: hidden; isolation: isolate;
+  transition: padding 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.3s;
+}
+/* sapuan merah dari kiri saat hover */
+.contact-list a::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, var(--red), #ff5a3c);
+  transform: scaleX(0); transform-origin: left; transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.contact-list a:hover { padding-left: 16px; color: #fff; }
+.contact-list a:hover::before { transform: scaleX(1); }
+.contact-list .mono { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); transition: color 0.3s; }
+.contact-list a:hover .mono { color: rgba(255, 255, 255, 0.85); }
+.ci-act { font-size: 10px; letter-spacing: 0.16em; opacity: 0; transform: translateX(8px); transition: opacity 0.3s, transform 0.3s; }
+.contact-list a:hover .ci-act { opacity: 1; transform: none; }
+.contact-list b { color: var(--red-2); font-weight: 400; transition: transform 0.35s, color 0.3s; }
+.contact-list a:hover b { color: #fff; transform: translate(3px, -3px) rotate(45deg); }
+
+/* ---- animasi muncul saat discroll ---- */
+.contact .rv { opacity: 0; transform: translateY(24px); transition: opacity 0.7s var(--d, 0s), transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) var(--d, 0s); }
+.contact.in .rv { opacity: 1; transform: none; }
+.contact-title .word { display: inline-block; overflow: hidden; vertical-align: top; }
+.contact-title .word > span { display: inline-block; transform: translateY(110%); transition: transform 0.9s cubic-bezier(0.2, 0.9, 0.2, 1) var(--d); }
+.contact.in .contact-title .word > span { transform: none; }
+.contact-title .word:hover > span { color: var(--red-2); transition: color 0.2s; }
+.jp-red span { display: inline-block; opacity: 0; transform: translateY(10px) scale(0.6); transition: opacity 0.4s var(--d), transform 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) var(--d); }
+.contact.in .jp-red span { opacity: 1; transform: none; }
+.jp-red span:hover { transform: translateY(-6px) scale(1.2); color: #ff8a6e; transition: transform 0.2s; }
+
+/* menara: matahari membesar, rangka tergambar dari bawah ke atas, ikut mouse */
+.tower-wrap { justify-self: end; width: 100%; max-width: 420px; transform: translate(calc(var(--mx, 0) * -18px), calc(var(--my, 0) * -12px)); transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.tower-wrap .tower-art { max-width: none; }
+.art-sun { transform-origin: 160px 190px; transform: scale(0); transition: transform 1.2s cubic-bezier(0.2, 1.2, 0.3, 1) 0.2s; }
+.contact.in .art-sun { transform: scale(1) translate(calc(var(--mx, 0) * 14px), calc(var(--my, 0) * 10px)); }
+.draw { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0.5s ease calc(0.5s + var(--i) * 0.045s); }
+.contact.in .draw { stroke-dashoffset: 0; }
+.art-deck { opacity: 0; transition: opacity 0.6s 1.6s; }
+.contact.in .art-deck { opacity: 1; }
+.art-beacon { animation: beacon 1.4s infinite; transform-origin: 150px 9px; }
+@keyframes beacon { 50% { opacity: 0.2; transform: scale(0.6); } }
+.tower-wrap:hover .art-tower { animation: sway 1.6s ease-in-out; transform-origin: 150px 380px; }
+@keyframes sway { 25% { transform: rotate(1.2deg); } 75% { transform: rotate(-1.2deg); } }
+
+/* gedung kecil "pop" naik satu per satu, melompat saat di-hover */
+.skyline { display: flex; align-items: flex-end; justify-content: space-between; gap: 6px; margin-top: 50px; overflow: hidden; opacity: 0.95; }
+.sky-b { flex: 0 0 auto; display: block; transform: translateY(110%); transition: transform 0.8s cubic-bezier(0.3, 1.5, 0.5, 1) var(--d); }
+.contact.in .sky-b { transform: none; }
+.sky-b .iso { display: block; transition: transform 0.3s cubic-bezier(0.3, 1.8, 0.5, 1); }
+.sky-b:hover .iso { transform: translateY(-14px) scale(1.06); }
+
+/* kelopak sakura berjatuhan pelan */
+.petals { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.petals i {
+  position: absolute; top: -20px; left: calc(var(--i) * 7.3% + 2%); width: 10px; height: 8px; border-radius: 80% 0 80% 0;
+  background: #ff9fc4; opacity: 0.55; animation: fall calc(9s + var(--i) * 0.7s) linear calc(var(--i) * -1.3s) infinite;
+}
+@keyframes fall {
+  to { transform: translate(calc(-60px + var(--i) * 6px), 110vh) rotate(540deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .petals { display: none; }
+  .contact .rv, .contact-title .word > span, .jp-red span, .sky-b, .art-sun, .draw { transition: none; }
+}
 .copy { margin: 0; padding: 22px 0 28px; font-size: 10px; letter-spacing: 0.15em; color: var(--muted); border-top: 1px solid var(--line); text-transform: uppercase; }
 
 @media (max-width: 820px) {
@@ -257,7 +330,7 @@ body.dragging .stage canvas { cursor: grabbing; }
   .nav-status { display: none; }
   .nav-links a .mono { display: none; }
   .hero-shade { background: linear-gradient(0deg, rgba(11, 11, 12, 0.9) 10%, rgba(11, 11, 12, 0.45) 60%, rgba(11, 11, 12, 0.2)); }
-  .tower-art { justify-self: center; max-width: 300px; }
+  .tower-wrap { justify-self: center; max-width: 300px; }
   .toast { top: 112px; width: calc(100% - 36px); }
   .facts { grid-template-columns: 1fr 1fr; }
 }

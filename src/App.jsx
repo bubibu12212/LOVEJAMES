@@ -18,6 +18,7 @@ export default function App() {
   const [world, setWorld] = useState('garden') // garden | id project
   const [focus, setFocus] = useState(null) // hal di dekat pemain
   const [modal, setModal] = useState(false) // jendela detail project
+  const [contactOpen, setContactOpen] = useState(false) // jendela kontak
   const [fade, setFade] = useState(false)
   const [inView, setInView] = useState(false)
   const [canEnter, setCanEnter] = useState(false)
@@ -34,6 +35,7 @@ export default function App() {
     setMode('scroll')
     setFocus(null)
     setModal(false)
+    setContactOpen(false)
     setWorld('garden')
     document.body.classList.remove('locked')
   }, [])
@@ -96,6 +98,7 @@ export default function App() {
   }, [])
 
   const openProject = useCallback(() => setModal(true), [])
+  const openContact = useCallback(() => setContactOpen(true), [])
 
   return (
     <>
@@ -121,6 +124,7 @@ export default function App() {
                     onFocus={setFocus}
                     onWorldSwitch={switchWorld}
                     onOpenProject={openProject}
+                    onOpenContact={openContact}
                   />
                 </Suspense>
               </Canvas>
@@ -136,6 +140,9 @@ export default function App() {
               onExit={exit}
               onOpenProject={openProject}
               onCloseModal={() => setModal(false)}
+              contactOpen={contactOpen}
+              onOpenContact={openContact}
+              onCloseContact={() => setContactOpen(false)}
             />
           </div>
         </div>

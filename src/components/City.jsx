@@ -57,39 +57,39 @@ function Ground() {
     <group>
       <mesh rotation-x={-Math.PI / 2} position={[0, -0.01, -40]} receiveShadow>
         <planeGeometry args={[400, 400]} />
-        <meshStandardMaterial color="#8c8e8f" roughness={0.95} />
+        <meshStandardMaterial color="#26262a" roughness={0.6} />
       </mesh>
 
       {/* boulevard & trotoar */}
       <mesh rotation-x={-Math.PI / 2} position={[0, 0.005, -19.25]} receiveShadow>
         <planeGeometry args={[AVENUE_HALF * 2, 56.5]} />
-        <meshStandardMaterial map={boulevard} roughness={0.85} />
+        <meshStandardMaterial map={boulevard} color="#8d8a86" roughness={0.32} metalness={0.25} />
       </mesh>
       {[-1, 1].map((s) => (
         <mesh key={s} rotation-x={-Math.PI / 2} position={[s * 6.25, 0.004, -19.25]} receiveShadow>
           <planeGeometry args={[3.5, 56.5]} />
-          <meshStandardMaterial map={sidewalk} color="#cfcac2" roughness={0.9} />
+          <meshStandardMaterial map={sidewalk} color="#7d7a76" roughness={0.4} metalness={0.2} />
         </mesh>
       ))}
       {/* plaza depan gerbang */}
       <mesh rotation-x={-Math.PI / 2} position={[0, 0.005, 16]} receiveShadow>
         <planeGeometry args={[64, 32]} />
-        <meshStandardMaterial map={plaza} roughness={0.85} />
+        <meshStandardMaterial map={plaza} color="#6f6c69" roughness={0.38} metalness={0.2} />
       </mesh>
 
       {/* jalan raya */}
       <mesh rotation-x={-Math.PI / 2} position={[0, 0.012, CROSS_Z]} receiveShadow>
         <planeGeometry args={[roadLen, ROAD_W]} />
-        <meshStandardMaterial color="#2c2f33" roughness={0.9} />
+        <meshStandardMaterial color="#1c1d21" roughness={0.38} metalness={0.3} />
       </mesh>
       <mesh rotation-x={-Math.PI / 2} position={[0, 0.012, -64]} receiveShadow>
         <planeGeometry args={[roadLen, ROAD_W]} />
-        <meshStandardMaterial color="#2c2f33" roughness={0.9} />
+        <meshStandardMaterial color="#1c1d21" roughness={0.38} metalness={0.3} />
       </mesh>
       {[-1, 1].map((s) => (
         <mesh key={s} rotation-x={-Math.PI / 2} position={[s * SIDE_AVENUE_X, 0.011, -55]} receiveShadow>
           <planeGeometry args={[ROAD_W, roadLen]} />
-          <meshStandardMaterial color="#2c2f33" roughness={0.9} />
+          <meshStandardMaterial color="#1c1d21" roughness={0.38} metalness={0.3} />
         </mesh>
       ))}
       <RoadMarks />
@@ -143,7 +143,7 @@ function Towers() {
   const beacon = useRef()
   const strip = useRef()
   const band = useRef()
-  const mat = useMemo(() => makeFacadeMaterial({ lit: 0.28, glow: 1.3, seed: 2, floorH: 3.4, bayW: 1.5 }), [])
+  const mat = useMemo(() => makeFacadeMaterial({ lit: 0.38, glow: 1.9, seed: 2, floorH: 3.4, bayW: 1.5 }), [])
   const geo = useMemo(() => new THREE.BoxGeometry(1, 1, 1).translate(0, 0.5, 0), [])
   const tall = useMemo(() => towers.filter((t) => t.h > 28), [])
   const neon = useMemo(() => towers.filter((t) => t.seed > 0.72), [])
@@ -221,46 +221,44 @@ function Towers() {
   )
 }
 
-// billboard hologram di fasad gedung sepanjang boulevard
-function holoTexture(lines, hue) {
+// papan neon vertikal khas Tokyo yang menjorok dari fasad (terlihat dari boulevard)
+function neonTexture(chars, hue) {
   const c = document.createElement('canvas')
-  c.width = 256
+  c.width = 128
   c.height = 512
   const g = c.getContext('2d')
-  const grad = g.createLinearGradient(0, 0, 0, 512)
-  grad.addColorStop(0, `hsla(${hue}, 90%, 55%, 0.95)`)
-  grad.addColorStop(1, `hsla(${(hue + 60) % 360}, 90%, 35%, 0.9)`)
-  g.fillStyle = grad
-  g.fillRect(0, 0, 256, 512)
-  g.fillStyle = 'rgba(0,0,0,0.18)'
-  for (let y = 0; y < 512; y += 4) g.fillRect(0, y, 256, 1.5) // garis scan
-  g.strokeStyle = 'rgba(255,255,255,0.8)'
-  g.lineWidth = 4
-  g.strokeRect(14, 14, 228, 484)
-  g.fillStyle = '#fff'
+  g.fillStyle = '#0c0b10'
+  g.fillRect(0, 0, 128, 512)
+  g.strokeStyle = `hsl(${hue}, 100%, 62%)`
+  g.lineWidth = 5
+  g.strokeRect(8, 8, 112, 496)
+  g.fillStyle = `hsl(${hue}, 100%, 78%)`
+  g.shadowColor = `hsl(${hue}, 100%, 60%)`
+  g.shadowBlur = 18
   g.textAlign = 'center'
-  g.font = '700 46px "Space Grotesk", sans-serif'
-  lines.forEach((l, i) => g.fillText(l, 128, 190 + i * 64))
-  g.font = '500 18px "JetBrains Mono", monospace'
-  g.fillText('NEO · CITY', 128, 460)
+  g.textBaseline = 'middle'
+  const step = 440 / chars.length
+  g.font = `700 ${Math.min(84, step * 0.85)}px "Noto Sans JP", sans-serif`
+  chars.forEach((ch, i) => g.fillText(ch, 64, 40 + step * (i + 0.5)))
   const t = new THREE.CanvasTexture(c)
   t.colorSpace = THREE.SRGBColorSpace
   return t
 }
 
-const HOLO_COPY = [['CREATE', 'CODE', '3D'], ['BUILD', 'THE', 'FUTURE'], ['DESIGN', '+', 'DEV'], ['HELLO', 'WORLD', '*']]
+const NEON_COPY = [['東', '京'], ['ラ', 'ー', 'メ', 'ン'], ['作', '品', '展'], ['カ', 'フ', 'ェ'], ['夜', '景'], ['未', '来'], ['ホ', 'テ', 'ル'], ['書', '店']]
 
-function HoloBoards() {
-  const boards = useMemo(() => {
-    const picks = towers.filter((t) => Math.abs(t.x) < 20 && t.z < -2 && t.z > -50 && t.h > 16).slice(0, 4)
+function NeonSigns() {
+  const signs = useMemo(() => {
+    const picks = towers.filter((t) => Math.abs(t.x) < 20 && t.z < -2 && t.z > -50 && t.h > 12).slice(0, 8)
     return picks.map((t, i) => {
       const side = Math.sign(t.x)
+      const len = NEON_COPY[i % NEON_COPY.length].length
       return {
-        x: t.x - side * (t.w / 2 + 0.08),
-        z: t.z,
-        rot: side > 0 ? -Math.PI / 2 : Math.PI / 2,
-        y: Math.min(t.h - 5, 14),
-        tex: holoTexture(HOLO_COPY[i % HOLO_COPY.length], (i * 70 + 180) % 360),
+        x: t.x - side * (t.w / 2 + 0.9),
+        z: t.z + (i % 2 ? 1.8 : -1.8),
+        y: 6.5 + (i % 3) * 1.2,
+        h: 1.6 + len * 1.3,
+        tex: neonTexture(NEON_COPY[i % NEON_COPY.length], [350, 190, 20, 300, 160, 45, 330, 210][i % 8]),
       }
     })
   }, [])
@@ -268,14 +266,24 @@ function HoloBoards() {
   useFrame((state) => {
     const t = state.clock.elapsedTime
     mats.current.forEach((m, i) => {
-      if (m) m.opacity = 0.82 + Math.sin(t * 3 + i * 2) * 0.06 + (Math.sin(t * 37 + i) > 0.97 ? -0.3 : 0)
+      if (!m) return
+      const k = 1.7 + Math.sin(t * 2 + i) * 0.08 + (Math.sin(t * 23 + i * 7) > 0.985 ? -1 : 0) // sesekali berkedip
+      m.color.setScalar(k)
     })
   })
-  return boards.map((b, i) => (
-    <mesh key={i} position={[b.x, b.y, b.z]} rotation-y={b.rot}>
-      <planeGeometry args={[4, 8]} />
-      <meshBasicMaterial ref={(m) => { mats.current[i] = m }} map={b.tex} transparent toneMapped={false} color={[1.6, 1.6, 1.6]} side={THREE.DoubleSide} />
-    </mesh>
+  return signs.map((b, i) => (
+    <group key={i} position={[b.x, b.y, b.z]}>
+      <mesh>
+        <boxGeometry args={[1.5, b.h, 0.14]} />
+        <meshStandardMaterial color="#111" roughness={0.6} />
+      </mesh>
+      {[0.08, -0.08].map((z) => (
+        <mesh key={z} position={[0, 0, z]} rotation-y={z < 0 ? Math.PI : 0}>
+          <planeGeometry args={[1.4, b.h - 0.1]} />
+          <meshBasicMaterial ref={(m) => { if (z > 0) mats.current[i] = m }} map={b.tex} toneMapped={false} color={[1.7, 1.7, 1.7]} />
+        </mesh>
+      ))}
+    </group>
   ))
 }
 
@@ -359,7 +367,7 @@ function Lamps() {
       </instancedMesh>
       <instancedMesh ref={head} args={[undefined, undefined, lamps.length]}>
         <boxGeometry args={[1.1, 0.12, 0.32]} />
-        <meshStandardMaterial color="#fff3d9" emissive="#ffd9a0" emissiveIntensity={1.6} />
+        <meshStandardMaterial color="#fff3d9" emissive="#ffd9a0" emissiveIntensity={4} toneMapped={false} />
       </instancedMesh>
     </>
   )
@@ -386,7 +394,7 @@ function Planters() {
       dummy.scale.setScalar(0.9 + (i % 3) * 0.08)
       dummy.updateMatrix()
       crown.current.setMatrixAt(i, dummy.matrix)
-      crown.current.setColorAt(i, color.setHSL(0.24 + (i % 4) * 0.02, 0.42, 0.27 + (i % 3) * 0.03))
+      crown.current.setColorAt(i, color.setHSL(0.95 + (i % 4) * 0.01, 0.45, 0.62 + (i % 3) * 0.04)) // sakura
     })
     finish(box, trunk, crown)
   }, [])
@@ -395,7 +403,7 @@ function Planters() {
     <>
       <instancedMesh ref={box} args={[undefined, undefined, planters.length]} castShadow receiveShadow>
         <boxGeometry args={[1.7, 0.6, 1.7]} />
-        <meshStandardMaterial color="#a9a49b" roughness={0.9} />
+        <meshStandardMaterial color="#3b3a3d" roughness={0.7} />
       </instancedMesh>
       <instancedMesh ref={trunk} args={[undefined, undefined, planters.length]} castShadow>
         <cylinderGeometry args={[0.09, 0.14, 2.4, 8]} />
@@ -543,7 +551,7 @@ function GalleryBuilding() {
       </mesh>
       <group position={[0, 8.2, D / 2 + 0.05]}>
         <Text fontSize={1.5} letterSpacing={0.25} color="#1e2328" anchorX="center" anchorY="middle" fontWeight={700}>
-          GALERI
+          GALERI ギャラリー
         </Text>
         <Text position={[0, -1.05, 0]} fontSize={0.32} letterSpacing={0.2} color="#5b6168" anchorX="center" anchorY="middle">
           FOTO KEGIATAN · MASUK
@@ -558,7 +566,7 @@ export default function City({ playerRef }) {
     <group>
       <Ground />
       <Towers />
-      <HoloBoards />
+      <NeonSigns />
       <SkyTraffic />
       <Lamps />
       <Planters />

@@ -5,8 +5,8 @@ import * as THREE from 'three'
 import { makeFacadeMaterial } from '../world'
 
 const LABEL = { project: 'PROJECT', experience: 'PENGALAMAN' }
-const FACADE = { project: '#d9d5cd', experience: '#5a626c' }
-const W = 10   // lebar gedung (sepanjang jalan)
+const FACADE = { project: '#3a3d44', experience: '#4a4f58' }
+const W = 9    // lebar gedung (sepanjang jalan)
 const D = 10   // kedalaman gedung
 
 const BOARD_W = 4.4
@@ -60,7 +60,7 @@ function Billboard({ data, number, activeRef }) {
           </RoundedBox>
           <group position={[0, 0, 0.04]}>
             <Text position={[-pad, 0.95, 0]} fontSize={0.13} letterSpacing={0.18} color={accent} anchorX="left" anchorY="middle">
-              {`${LABEL[data.type] ?? 'PROJECT'}  ${number}`}
+              {`${number}  ·  ${(data.category ?? LABEL[data.type] ?? 'PROJECT').toUpperCase()}`}
             </Text>
             <Text position={[-pad, 0.76, 0]} fontSize={0.36} maxWidth={BOARD_W - 0.6} color="#ffffff" anchorX="left" anchorY="top" fontWeight={700}>
               {data.title}
@@ -149,7 +149,7 @@ export default function ProjectBuilding({ data, index, activeRef }) {
             {data.title}
           </Text>
           <Text position={[0, -0.5, 0]} fontSize={0.22} letterSpacing={0.3} color="#cfd5da" anchorX="center" anchorY="middle">
-            {`${LABEL[data.type] ?? 'PROJECT'} ${number}`}
+            {`${number} · ${(data.category ?? LABEL[data.type] ?? 'PROJECT').toUpperCase()}`}
           </Text>
         </group>
       </group>

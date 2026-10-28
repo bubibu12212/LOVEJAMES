@@ -34,12 +34,19 @@ function organic(parts, amount, top) {
   return g
 }
 
-// tajuk pohon kota: beberapa gumpalan daun digabung
+// tajuk pohon sakura: banyak gumpalan kecil di permukaan elips supaya terlihat rimbun, bukan bulat polos
 export function canopyGeometry() {
-  const blobs = [
-    [0, 3.1, 0, 1.05], [0.65, 2.85, 0.25, 0.75], [-0.6, 2.9, -0.2, 0.8],
-    [0.15, 3.65, -0.2, 0.7], [-0.25, 2.65, 0.55, 0.65], [0.4, 2.6, -0.55, 0.6],
-  ]
-  const parts = blobs.map(([x, y, z, r]) => new THREE.IcosahedronGeometry(r, 3).translate(x, y, z))
-  return organic(parts, 0.2, 4)
+  const parts = [new THREE.IcosahedronGeometry(0.95, 2).scale(1.25, 0.8, 1.25).translate(0, 3.15, 0)]
+  let seed = 7
+  const r = () => ((seed = (seed * 16807) % 2147483647) / 2147483647)
+  for (let i = 0; i < 26; i++) {
+    const t = r() * Math.PI * 2
+    const u = r() * 0.9 - 0.25
+    const rad = 1.35 * Math.sqrt(1 - u * u)
+    const x = Math.cos(t) * rad
+    const z = Math.sin(t) * rad
+    const y = 3.15 + u * 1.05
+    parts.push(new THREE.IcosahedronGeometry(0.28 + r() * 0.3, 1).translate(x, y, z))
+  }
+  return organic(parts, 0.1, 4.2)
 }

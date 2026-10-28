@@ -2,43 +2,55 @@
 // Ganti dengan data kamu. Kontak yang link-nya '#' tidak akan ditampilkan.
 export const profile = {
   name: 'Salsa Ica Indriani',
-  role: 'Developer & Creative Technologist',
-  tagline: 'Membangun pengalaman digital yang interaktif, rapi, dan berguna.',
+  short: 'SALSA',
+  role: 'Informatics Graduate — Software Developer',
+  tagline: "Hi, I'm Salsa — a recent Informatics graduate passionate about software development, technology, and creating innovative digital solutions.",
+  aboutTitle: 'Building digital things that matter',
   about: [
-    'Tulis perkenalan singkat tentang dirimu di sini: siapa kamu, apa yang kamu kerjakan, dan apa yang membuatmu bersemangat.',
-    'Paragraf kedua bisa berisi fokus keahlian, nilai kerja, atau hal yang sedang kamu pelajari.',
+    "I'm Salsa, a recent Informatics graduate passionate about software development and technology. I love turning ideas into clean, useful digital products — from the logic behind the scenes to the interface people actually touch.",
   ],
-  skills: ['React', 'Three.js', 'Node.js', 'Python', 'UI/UX'],
+  facts: [
+    { label: 'Education', value: 'S1 Informatics' },
+    { label: 'Focus', value: 'Software Development' },
+    { label: 'Based in', value: 'Indonesia' },
+  ],
+  skills: ['JavaScript', 'Python', 'React', 'Node.js', 'SQL', 'Git', 'Figma', 'Three.js'],
+  // Foto untuk bagian About: taruh file di public/photo.jpg (kosongkan '' kalau belum ada)
+  photo: '/photo.jpg',
+  // true = tampilkan animasi Three.js buatanmu (src/components/About3D.jsx) di bagian About, menggantikan foto
+  useAbout3D: false,
   contacts: [
-    { label: 'Email', href: '#' },        // contoh: 'mailto:nama@email.com'
-    { label: 'GitHub', href: '#' },       // contoh: 'https://github.com/username'
-    { label: 'LinkedIn', href: '#' },
-    { label: 'Instagram', href: '#' },
+    { label: 'Email', text: 'your.email@gmail.com', href: '#' },       // contoh: 'mailto:nama@email.com'
+    { label: 'LinkedIn', text: 'linkedin.com/in/username', href: '#' },
+    { label: 'GitHub', text: 'github.com/username', href: '#' },
   ],
 }
 
-// ===================== GEDUNG PROJECT DI KOTA =====================
-// side: -1 = kiri boulevard, 1 = kanan. z: posisi sepanjang jalan (0 = gerbang, makin minus makin jauh).
-// Jaga z antara -6 sampai -36, dan jangan taruh dua gedung di sisi yang sama kurang dari 12 jarak z-nya.
-// Hindari z sekitar -21 (itu jalan raya yang memotong).
-// floors = jumlah lantai, accent = warna lampu LED gedung, link = tombol "Buka" (kosongkan kalau tidak ada)
+// ===================== PROJECT (kartu + gedung di kota 3D) =====================
+// category = label kecil di kartu, building = gaya ilustrasi gedung di kartu:
+//   'glass' | 'apartment' | 'villa' | 'shop' | 'green' | 'wooden'
+// side: -1 = kiri boulevard, 1 = kanan. z = posisi sepanjang jalan di kota 3D.
+// Posisi yang tersedia: kiri z -9, -30, -41 dan kanan z -11, -30, -41 (z sekitar -21 itu jalan raya).
+// floors = jumlah lantai gedung 3D, link = tombol "View project" (kosongkan kalau belum ada)
 export const stations = [
-  { id: 'p1', type: 'project', title: 'Project 1',
-    desc: 'Deskripsi singkat project kamu: masalah apa yang diselesaikan, dan bagaimana caranya.',
-    tech: ['React', 'Node.js'], link: '',
-    side: -1, z: -9, floors: 5, accent: '#ffb259' },
-  { id: 'e1', type: 'experience', title: 'Pengalaman 1',
-    desc: 'Posisi, tempat, dan tahun. Tulis 1–2 pencapaian utama di sini.',
-    tech: [], link: '',
-    side: 1, z: -11, floors: 7, accent: '#5fd3f3' },
-  { id: 'p2', type: 'project', title: 'Project 2',
-    desc: 'Deskripsi project kedua: tujuan, peranmu, dan hasilnya.',
-    tech: ['Python', 'LLM'], link: '',
-    side: -1, z: -30, floors: 6, accent: '#ff7a8a' },
-  { id: 'e2', type: 'experience', title: 'Pengalaman 2',
-    desc: 'Posisi, tempat, dan tahun. Tulis 1–2 pencapaian utama di sini.',
-    tech: [], link: '',
-    side: 1, z: -32, floors: 4, accent: '#9b8cff' },
+  { id: 'p1', type: 'project', category: 'Web App', building: 'glass', title: 'Web App Project',
+    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
+    tech: ['React', 'Node.js'], link: '', side: -1, z: -9, floors: 7 },
+  { id: 'p2', type: 'project', category: 'Mobile App', building: 'apartment', title: 'Mobile App Project',
+    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
+    tech: ['Flutter', 'Firebase'], link: '', side: 1, z: -11, floors: 6 },
+  { id: 'p3', type: 'project', category: 'UI/UX Design', building: 'villa', title: 'UI/UX Case Study',
+    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
+    tech: ['Figma'], link: '', side: -1, z: -30, floors: 4 },
+  { id: 'p4', type: 'project', category: 'Database', building: 'shop', title: 'Database System',
+    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
+    tech: ['SQL', 'PostgreSQL'], link: '', side: 1, z: -30, floors: 5 },
+  { id: 'p5', type: 'project', category: 'Machine Learning', building: 'green', title: 'ML / Data Project',
+    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
+    tech: ['Python', 'Pandas'], link: '', side: -1, z: -41, floors: 8 },
+  { id: 'p6', type: 'project', category: 'Final Thesis', building: 'wooden', title: 'Thesis Project',
+    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
+    tech: ['Research'], link: '', side: 1, z: -41, floors: 3 },
 ]
 
 // ===================== GALERI KEGIATAN =====================

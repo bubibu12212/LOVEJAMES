@@ -1,81 +1,73 @@
 import { useEffect, useState } from 'react'
-import { profile, stations, gallery } from '../data'
+import { profile, stations } from '../data'
 import About3D from './About3D'
-import HeroCity from './HeroCity'
+import TokyoHero from './TokyoHero'
+import { IsoBuilding, TowerArt } from './Illustrations'
 
-const links = profile.contacts.filter((c) => c.href && c.href !== '#')
+const NAV = [
+  { id: 'top', label: 'Home' },
+  { id: 'about', label: 'About' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'contact', label: 'Contact' },
+]
 
 export function Nav() {
+  const [current, setCurrent] = useState('top')
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) setCurrent(e.target.id) }),
+      { rootMargin: '-45% 0px -50% 0px' }
+    )
+    NAV.forEach((n) => { const el = document.getElementById(n.id); if (el) io.observe(el) })
+    return () => io.disconnect()
+  }, [])
+
   return (
     <nav className="nav">
-      <a href="#top" className="nav-brand">{profile.name}</a>
+      <a href="#top" className="nav-brand">{profile.short}<span className="dot-red">.</span></a>
       <div className="nav-links">
-        <a href="#about">About</a>
-        <a href="#projects">Projects</a>
-        <a href="#contact">Contact</a>
+        {NAV.map((n, i) => (
+          <a key={n.id} href={`#${n.id}`} className={current === n.id ? 'on' : ''}>
+            <span className="mono">{String(i + 1).padStart(2, '0')}</span> {n.label}
+          </a>
+        ))}
       </div>
+      <span className="nav-status mono"><i /> Available</span>
     </nav>
   )
 }
 
-const ROLES = ['Developer', 'Creative Technologist', '3D Web Builder', 'Problem Solver']
-
-function RoleRotator() {
-  const [i, setI] = useState(0)
-  useEffect(() => {
-    const t = setInterval(() => setI((v) => (v + 1) % ROLES.length), 2400)
-    return () => clearInterval(t)
-  }, [])
+function Eyebrow({ no, en, jp }) {
   return (
-    <span className="role-rotator">
-      <span key={i}>{ROLES[i]}</span>
-    </span>
+    <p className="eyebrow">
+      <span className="rule" /> {no && <>{no} — </>}{en} <span className="jp">· {jp}</span>
+    </p>
   )
 }
 
 export function Hero() {
-  const projects = stations.filter((s) => s.type === 'project').length
-  const exp = stations.filter((s) => s.type === 'experience').length
-  const [first, ...rest] = profile.name.split(' ')
-
+  const [first, ...rest] = profile.name.toUpperCase().split(' ')
   return (
     <header className="hero" id="top">
-      <HeroCity />
+      <TokyoHero />
       <div className="hero-shade" aria-hidden />
-      <div className="hud-frame" aria-hidden><i /><i /><i /><i /></div>
-      <div className="hero-meta mono" aria-hidden>
-        <span>SECTOR 01 · HOME</span>
-        <span className="hide-sm">NEO-CITY / {new Date().getFullYear()}</span>
-      </div>
+      <div className="grid-lines" aria-hidden><i /><i /><i /></div>
 
       <div className="hero-inner">
-        <p className="status-pill"><span className="dot" /> Open for collaboration</p>
-        <h1>
-          <span className="line"><span>{first}</span></span>
-          <span className="line"><span className="grad">{rest.join(' ')}</span></span>
+        <Eyebrow en="Portfolio 2026" jp="ポートフォリオ" />
+        <h1 className="display">
+          <span className="line"><span>{first} {rest[0]}</span></span>
+          <span className="line"><span>{rest.slice(1).join(' ')}</span></span>
         </h1>
-        <p className="hero-role">
-          <span className="mono">&gt;</span> <RoleRotator />
-        </p>
+        <p className="hero-role">{profile.role}</p>
         <p className="hero-tag">{profile.tagline}</p>
         <div className="hero-actions">
-          <a className="btn primary" href="#projects">Jelajahi Kota Project <span aria-hidden>→</span></a>
-          <a className="btn ghost glass" href="#about">Tentang Aku</a>
+          <a className="btn red" href="#projects">View Projects <span aria-hidden>→</span></a>
+          <a className="btn line" href="#contact">Contact Me <span aria-hidden>→</span></a>
         </div>
       </div>
-
-      <div className="hero-bottom">
-        <dl className="stats">
-          <div><dt>{String(projects).padStart(2, '0')}</dt><dd>Project</dd></div>
-          <div><dt>{String(exp).padStart(2, '0')}</dt><dd>Pengalaman</dd></div>
-          <div><dt>{String(gallery.length).padStart(2, '0')}</dt><dd>Momen</dd></div>
-        </dl>
-        <div className="marquee" aria-hidden>
-          <div>
-            {[...profile.skills, ...profile.skills, ...profile.skills, ...profile.skills].map((s, i) => <span key={i}>{s}</span>)}
-          </div>
-        </div>
-      </div>
+      <p className="page-no mono">01 / 04</p>
+      <p className="scroll-note mono">Scroll <span>↓</span></p>
     </header>
   )
 }
@@ -83,33 +75,94 @@ export function Hero() {
 export function About() {
   return (
     <section className="about" id="about">
+      <div className="grid-lines" aria-hidden><i /><i /><i /></div>
+      <div className="about-visual">
+        <div className="sun" aria-hidden />
+        {profile.useAbout3D ? (
+          <About3D />
+        ) : (
+          <div className="portrait">
+            {profile.photo ? <img src={profile.photo} alt={profile.name} onError={(e) => { e.currentTarget.style.display = 'none' }} /> : null}
+            <span className="portrait-fallback mono">Taruh fotomu di<br />public/photo.jpg</span>
+          </div>
+        )}
+        <p className="caption mono">{profile.name} · 写真</p>
+      </div>
       <div className="about-text">
-        <p className="eyebrow">About me</p>
-        <h2>Halo, aku {profile.name.split(' ')[0]}.</h2>
-        {profile.about.map((p, i) => <p key={i}>{p}</p>)}
-        <ul className="skills">
+        <Eyebrow no="02" en="About me" jp="私について" />
+        <h2 className="display">{profile.aboutTitle}</h2>
+        {profile.about.map((p, i) => <p key={i} className="lead">{p}</p>)}
+        <dl className="facts">
+          {profile.facts.map((f) => (
+            <div key={f.label}><dt className="mono">{f.label}</dt><dd>{f.value}</dd></div>
+          ))}
+        </dl>
+        <p className="mono label">Skills · スキル</p>
+        <ul className="chips">
           {profile.skills.map((s) => <li key={s}>{s}</li>)}
         </ul>
-      </div>
-      <div className="about-visual">
-        <About3D />
       </div>
     </section>
   )
 }
 
+export function ProjectsGrid() {
+  return (
+    <div className="projects-head">
+      <div className="grid-lines" aria-hidden><i /><i /><i /></div>
+      <div className="projects-title">
+        <div>
+          <Eyebrow no="03" en="Selected works" jp="作品" />
+          <h2 className="display big">Projects<span className="dot-red">.</span></h2>
+        </div>
+        <p className="lead">A few things I&apos;ve built while studying and exploring. Each one is a building in my city — scroll down to walk through it.</p>
+      </div>
+      <div className="cards">
+        {stations.map((s, i) => (
+          <article key={s.id} className="card">
+            <div className="card-art"><IsoBuilding kind={s.building} /></div>
+            <div className="card-body">
+              <p className="mono card-cat"><span>{String(i + 1).padStart(2, '0')}</span> {s.category}</p>
+              <h3>{s.title}</h3>
+              <p>{s.desc}</p>
+              {s.link
+                ? <a className="mono card-link" href={s.link} target="_blank" rel="noreferrer">View project ↗</a>
+                : <span className="mono card-link muted">View project →</span>}
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function Contact() {
+  const kinds = ['glass', 'apartment', 'green', 'shop', 'wooden', 'villa', 'glass', 'apartment']
   return (
     <footer className="contact" id="contact">
-      <p className="eyebrow">Contact</p>
-      <h2>Ayo bekerja sama.</h2>
-      <p className="contact-sub">Punya ide, project, atau kesempatan kerja? Hubungi aku lewat:</p>
-      <div className="contact-links">
-        {links.length > 0
-          ? links.map((c) => <a key={c.label} className="btn ghost" href={c.href} target="_blank" rel="noreferrer">{c.label}</a>)
-          : <span className="muted">Isi link kontak di src/data.js</span>}
+      <div className="grid-lines" aria-hidden><i /><i /><i /></div>
+      <div className="contact-main">
+        <div>
+          <Eyebrow no="04" en="Contact" jp="お問い合わせ" />
+          <h2 className="display">Let&apos;s work<br />together</h2>
+          <p className="jp-red">一緒に作りましょう</p>
+          <ul className="contact-list">
+            {profile.contacts.map((c) => (
+              <li key={c.label}>
+                <span className="mono">{c.label}</span>
+                {c.href && c.href !== '#'
+                  ? <a href={c.href} target="_blank" rel="noreferrer">{c.text}<b>↗</b></a>
+                  : <span>{c.text}<b>↗</b></span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <TowerArt />
       </div>
-      <p className="copy">© {new Date().getFullYear()} {profile.name}</p>
+      <div className="skyline" aria-hidden>
+        {kinds.map((k, i) => <IsoBuilding key={i} kind={k} height={70 + (i % 3) * 14} />)}
+      </div>
+      <p className="copy mono">© {new Date().getFullYear()} {profile.name} · Made with three.js</p>
     </footer>
   )
 }

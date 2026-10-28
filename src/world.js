@@ -119,7 +119,9 @@ export const GALLERY = { z: -55, front: -46.5, ring: [0, -43.4] }
 export const PLAYER_START = [0, 0, -6.5]
 export const CITY_BOUNDS = { minX: -7.3, maxX: 7.3, minZ: -44.8, maxZ: 8 }
 
-export const stationSpots = stations.map((s) => ({
+const ACCENTS = ['#ff3b2f', '#ff8a3d', '#ff4f8b', '#ffd25e', '#5fe0ff', '#c58bff']
+export const stationSpots = stations.map((s, i) => ({
+  accent: ACCENTS[i % ACCENTS.length],
   ...s,
   center: [s.side * 13, s.z],
   ring: [s.side * 6.2, s.z],
@@ -138,7 +140,7 @@ function blocked(x, z, w, d) {
   if (hit(SIDE_AVENUE_X, 0, ROAD_W / 2 + 0.5, 300) || hit(-SIDE_AVENUE_X, 0, ROAD_W / 2 + 0.5, 300)) return true
   if (hit(0, 0, 60, 1.5)) return true // tembok kota
   if (hit(0, GALLERY.z, 10, 9.5)) return true
-  return stationSpots.some((s) => hit(s.center[0], s.center[1], 5.5, 6))
+  return stationSpots.some((s) => hit(s.center[0], s.center[1], 5.5, 5))
 }
 // barisan di samping gedung project
 for (const side of [-1, 1]) {
@@ -181,8 +183,8 @@ export const cityObstacles = []
 lamps.forEach(([x, z]) => cityObstacles.push({ x, z, r: 0.2, h: 5 }))
 planters.forEach(([x, z]) => cityObstacles.push({ x, z, r: 0.95, h: 1 }))
 for (const side of [-1, 1]) {
-  cityObstacles.push({ x: side * 4.3, z: 0, r: 0.9, h: 8 }) // pilar gerbang
-  for (let x = 5.2; x <= 9; x += 0.6) cityObstacles.push({ x: side * x, z: 0, r: 0.45, h: 6.5 }) // tembok
+  cityObstacles.push({ x: side * 4.05, z: 0, r: 0.8, h: 9.5 }) // pilar torii
+  for (let x = 5.2; x <= 9; x += 0.6) cityObstacles.push({ x: side * x, z: 0, r: 0.45, h: 2.4 }) // pagar
 }
 
 // ===================== RUANG GALERI =====================

@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { Sky, Environment, Lightformer } from '@react-three/drei'
-import { EffectComposer, Bloom, Vignette, SMAA } from '@react-three/postprocessing'
+import { Stars, Environment, Lightformer } from '@react-three/drei'
 import * as THREE from 'three'
 import Character from './Character'
 import Gate from './Gate'
@@ -24,6 +23,34 @@ const entryLook = new THREE.Vector3()
 const easeInOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2)
 
 const smooth = (a, b, x) => THREE.MathUtils.smoothstep(x, a, b)
+
+// langit malam: gradien biru tua → ungu-merah di cakrawala, ditambah bintang
+function NightSky() {
+  const mat = useMemo(() => new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    depthWrite: false,
+    fog: false,
+    vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `varying vec3 vP;
+      void main(){
+        float h = clamp(vP.y, -0.2, 1.0);
+        vec3 top = vec3(0.012, 0.015, 0.04);
+        vec3 mid = vec3(0.05, 0.035, 0.1);
+        vec3 hor = vec3(0.32, 0.09, 0.14);
+        vec3 c = mix(hor, mid, smoothstep(-0.02, 0.2, h));
+        c = mix(c, top, smoothstep(0.2, 0.75, h));
+        gl_FragColor = vec4(c, 1.0);
+      }`,
+  }), [])
+  return (
+    <group>
+      <mesh material={mat} renderOrder={-1}>
+        <sphereGeometry args={[350, 32, 16]} />
+      </mesh>
+      <Stars radius={300} depth={40} count={1500} factor={5} fade speed={0.3} />
+    </group>
+  )
+}
 
 // drag mouse / jari untuk memutar kamera, scroll untuk zoom
 function useOrbitControls(enabled) {
@@ -65,6 +92,7 @@ function useOrbitControls(enabled) {
 export default function Scene({ mode, world, progressRef, onActive, onPhoto, onWorldSwitch }) {
   const player = useRef()
   const light = useRef()
+  const playerLight = useRef()
   const activeId = useRef(null)
   const activePhoto = useRef(null)
   const gateOpen = useRef(0)
@@ -180,7 +208,8 @@ export default function Scene({ mode, world, progressRef, onActive, onPhoto, onW
     }
 
     // bayangan ikut pemain
-    light.current.position.set(p.x + 30, 16, p.z + 20)
+    light.current.position.set(p.x - 18, 30, p.z + 14)
+    playerLight.current.position.set(p.x + 0.8, p.y + 3.2, p.z + 1.6)
     light.current.target.position.set(p.x, 0, p.z)
     light.current.target.updateMatrixWorld()
 
@@ -224,19 +253,22 @@ export default function Scene({ mode, world, progressRef, onActive, onPhoto, onW
 
   return (
     <>
-      {/* senja: matahari rendah, langit oranye-ungu, kabut tipis */}
-      <Sky sunPosition={[70, 9, 45]} turbidity={9} rayleigh={2.6} mieCoefficient={0.008} mieDirectionalG={0.9} />
-      <fog attach="fog" args={['#c9a08f', 50, 210]} />
-      <hemisphereLight args={['#aebfe0', '#5a4a44', 0.7]} />
-      <Environment resolution={256} frames={1} environmentIntensity={0.7}>
-        <Lightformer intensity={3} color="#ffb27a" position={[60, 8, 40]} scale={[80, 18, 1]} target={[0, 0, 0]} />
-        <Lightformer intensity={1.2} color="#8fa7e8" position={[0, 60, 0]} rotation-x={Math.PI / 2} scale={[160, 160, 1]} />
-        <Lightformer intensity={0.6} color="#ff8fb8" position={[-60, 10, -40]} scale={[80, 14, 1]} target={[0, 0, 0]} />
+      {/* Tokyo malam: langit gradien buatan sendiri (bukan Sky bawaan, yang bisa menghasilkan NaN → layar hitam) */}
+      <NightSky />
+      <fog attach="fog" args={['#120d16', 35, 170]} />
+      <hemisphereLight args={['#4b5a86', '#1a1012', 0.55]} />
+      <ambientLight intensity={0.12} />
+      <Environment resolution={256} frames={1} environmentIntensity={0.55}>
+        <Lightformer intensity={2.5} color="#ff3b5c" position={[40, 10, -20]} scale={[60, 10, 1]} target={[0, 0, 0]} />
+        <Lightformer intensity={2} color="#36d6ff" position={[-40, 12, -10]} scale={[60, 10, 1]} target={[0, 0, 0]} />
+        <Lightformer intensity={1.2} color="#ffb070" position={[0, 8, 50]} scale={[80, 12, 1]} target={[0, 0, 0]} />
+        <Lightformer intensity={0.5} color="#3a4a80" position={[0, 60, 0]} rotation-x={Math.PI / 2} scale={[160, 160, 1]} />
       </Environment>
+      {/* cahaya bulan (bayangan) */}
       <directionalLight
         ref={light}
-        intensity={2.4}
-        color="#ffc995"
+        intensity={0.9}
+        color="#9fb4ff"
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-bias={-0.0004}
@@ -247,6 +279,8 @@ export default function Scene({ mode, world, progressRef, onActive, onPhoto, onW
         shadow-camera-bottom={-26}
         shadow-camera-far={90}
       />
+      {/* lampu hangat yang mengikuti karakter, seperti lampu jalan di dekatnya */}
+      <pointLight ref={playerLight} intensity={8} distance={8} color="#ffc48a" />
 
       <group visible={world === 'city'}>
         <City playerRef={player} />
@@ -259,13 +293,6 @@ export default function Scene({ mode, world, progressRef, onActive, onPhoto, onW
       <group visible={world === 'room'}>
         <GalleryRoom activePhotoRef={activePhoto} />
       </group>
-
-      <EffectComposer multisampling={0} enableNormalPass={false}>
-        <Bloom mipmapBlur luminanceThreshold={0.95} intensity={0.75} radius={0.7} />
-        <Vignette offset={0.3} darkness={0.55} />
-        <SMAA />
-      </EffectComposer>
-
       <Character
         playerRef={player}
         enabled={explore && ready}

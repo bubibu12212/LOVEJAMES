@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import { KeyboardControls } from '@react-three/drei'
 import Scene from './components/Scene'
 import Overlay from './components/Overlay'
-import { Nav, Hero, About, Contact } from './components/Sections'
+import { Nav, Hero, About, ProjectsGrid, Contact } from './components/Sections'
 
 const keyMap = [
   { name: 'forward', keys: ['KeyW', 'ArrowUp'] },
@@ -46,7 +46,8 @@ export default function App() {
     const onScroll = () => {
       const el = section.current
       const range = el.offsetHeight - window.innerHeight
-      const p = Math.min(1, Math.max(0, (window.scrollY - el.offsetTop) / range))
+      const top = el.getBoundingClientRect().top + window.scrollY
+      const p = Math.min(1, Math.max(0, (window.scrollY - top) / range))
       progress.current = p
       stage.current.style.setProperty('--p', p.toFixed(3))
       // tombol "Masuk ke Kota" muncul setelah gerbang terbuka; user sendiri yang memutuskan masuk
@@ -98,7 +99,9 @@ export default function App() {
       <Hero />
       <About />
 
-      <section className="projects" id="projects" ref={section}>
+      <section className="projects" id="projects">
+        <ProjectsGrid />
+        <div className="gate-section" ref={section}>
         <div className={`stage ${mode === 'explore' ? 'is-explore' : ''}`} ref={stage}>
           <KeyboardControls map={keyMap}>
             <Canvas
@@ -120,6 +123,7 @@ export default function App() {
             </Canvas>
           </KeyboardControls>
           <Overlay mode={mode} world={world} active={active} photo={photo} fade={fade} canEnter={canEnter} onEnter={enter} onExit={exit} />
+        </div>
         </div>
       </section>
 

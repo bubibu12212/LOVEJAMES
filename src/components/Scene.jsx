@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Stars, Environment, Lightformer } from '@react-three/drei'
 import * as THREE from 'three'
@@ -125,6 +125,7 @@ export default function Scene({ mode, world, progressRef, onFocus, onWorldSwitch
   const focus = useRef(0)
   const switching = useRef(false)
   const lastBuilding = useRef(null)
+  const prevWorld = useRef(world)
   const entry = useRef(1)
   const [ready, setReady] = useState(false)
   const { camera } = useThree()
@@ -133,14 +134,19 @@ export default function Scene({ mode, world, progressRef, onFocus, onWorldSwitch
   const project = buildingSpots.find((b) => b.id === world) ?? null
   useOrbitControls(explore && ready)
 
-  // pindah dunia: taruh pemain di titik masuk
-  useEffect(() => {
+  // pindah dunia: taruh pemain di titik masuk.
+  // Dibandingkan dengan dunia sebelumnya (bukan posisi pemain), dan pakai useLayoutEffect supaya
+  // berjalan sebelum frame berikutnya: kalau tombol jalan masih ditekan, posisi lama sempat
+  // terpotong batas taman sehingga pemain muncul lagi di gerbang.
+  useLayoutEffect(() => {
     const p = player.current
+    const from = prevWorld.current
+    prevWorld.current = world
     let spawn = null
     if (world !== 'garden') {
       spawn = ROOM_SPAWN
       lastBuilding.current = world
-    } else if (p.position.z > ROOM.cz - 50) {
+    } else if (from !== 'garden') {
       const b = buildingSpots.find((s) => s.id === lastBuilding.current)
       spawn = b ? b.back : PLAYER_START
     }

@@ -16,7 +16,7 @@ export const profile = {
   ],
   skills: ['JavaScript', 'Python', 'React', 'Node.js', 'SQL', 'Git', 'Figma', 'Three.js'],
   // Foto untuk bagian About: taruh file di public/photo.jpg (kosongkan '' kalau belum ada)
-  photo: '/photo.jpg',
+  photo: 'public/gallery/ica.jpeg',
   // true = tampilkan animasi Three.js buatanmu (src/components/About3D.jsx) di bagian About, menggantikan foto
   useAbout3D: false,
   contacts: [

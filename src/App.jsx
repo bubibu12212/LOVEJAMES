@@ -40,6 +40,23 @@ export default function App() {
     document.body.classList.remove('locked')
   }, [])
 
+  const switchWorld = useCallback((target) => {
+    setFade(true)
+    setTimeout(() => {
+      setFocus(null)
+      setModal(false)
+      document.body.style.cursor = ''
+      setWorld(target)
+      setTimeout(() => setFade(false), 150)
+    }, 450)
+  }, [])
+
+  // di dalam gedung: Esc / tombol Exit = keluar gedung (kembali ke taman), bukan keluar dari mode jalan-jalan
+  const leave = useCallback(() => {
+    if (world !== 'garden') switchWorld('garden')
+    else exit()
+  }, [world, switchWorld, exit])
+
   // progres scroll di section Projects: 0 = gerbang tertutup, 1 = gerbang terbuka penuh
   useEffect(() => {
     const onScroll = () => {
@@ -78,24 +95,14 @@ export default function App() {
   useEffect(() => {
     if (mode !== 'explore') return
     const key = (e) => {
-      if (e.key === 'Escape') exit()
+      if (e.key === 'Escape') leave()
       // E = buka project saat berdiri di depan layar
       if ((e.key === 'e' || e.key === 'E') && focus?.type === 'screen') setModal(true)
     }
     window.addEventListener('keydown', key)
     return () => window.removeEventListener('keydown', key)
-  }, [mode, exit, focus])
+  }, [mode, leave, focus])
 
-  const switchWorld = useCallback((target) => {
-    setFade(true)
-    setTimeout(() => {
-      setFocus(null)
-      setModal(false)
-      document.body.style.cursor = ''
-      setWorld(target)
-      setTimeout(() => setFade(false), 150)
-    }, 450)
-  }, [])
 
   const openProject = useCallback(() => setModal(true), [])
   const openContact = useCallback(() => setContactOpen(true), [])
@@ -111,7 +118,7 @@ export default function App() {
           <div className={`stage ${mode === 'explore' ? 'is-explore' : ''}`} ref={stage}>
             <KeyboardControls map={keyMap}>
               <Canvas
-                shadows="soft"
+                shadows
                 dpr={[1, 2]}
                 frameloop={inView || mode === 'explore' ? 'always' : 'never'}
                 camera={{ position: [0, 2.6, 22], fov: 50, near: 0.1, far: 500 }}
@@ -137,7 +144,7 @@ export default function App() {
               fade={fade}
               canEnter={canEnter}
               onEnter={enter}
-              onExit={exit}
+              onExit={leave}
               onOpenProject={openProject}
               onCloseModal={() => setModal(false)}
               contactOpen={contactOpen}

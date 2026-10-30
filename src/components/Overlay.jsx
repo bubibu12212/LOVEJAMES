@@ -208,7 +208,7 @@ export default function Overlay({ mode, world, focus, modal, fade, canEnter, onE
             <span>{project ? `${project.category} · inside` : 'The Garden · 庭園'}</span>
           </div>
 
-          <button className="btn ghost hud-exit glass" onClick={onExit}>Exit <kbd>Esc</kbd></button>
+          <button className="btn ghost hud-exit glass" onClick={onExit}>{project ? 'Leave building' : 'Exit'} <kbd>Esc</kbd></button>
 
           <div className="hud-keys glass">
             <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk</span>

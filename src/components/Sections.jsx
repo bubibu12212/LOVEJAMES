@@ -244,6 +244,15 @@ export function Contact() {
         ))}
       </div>
       <p className="copy mono">© {new Date().getFullYear()} {profile.name} · Made with three.js</p>
+      {/* kredit wajib: model pohon sakura berlisensi CC BY-NC-ND 4.0 */}
+      <p className="credit mono">
+        3D model{' '}
+        <a href="https://sketchfab.com/3d-models/sakura-tree-c5795e23566a414692042560e98a2306" target="_blank" rel="noreferrer">"Sakura tree"</a>
+        {' '}by{' '}
+        <a href="https://sketchfab.com/TatianaDevos" target="_blank" rel="noreferrer">TatianaDevos</a>
+        {' '}·{' '}
+        <a href="http://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noreferrer">CC BY-NC-ND 4.0</a>
+      </p>
     </footer>
   )
 }

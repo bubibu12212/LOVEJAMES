@@ -16,7 +16,7 @@ export const profile = {
   ],
   skills: ['JavaScript', 'Python', 'React', 'Node.js', 'SQL', 'Git', 'Figma', 'Three.js'],
   // Foto untuk bagian About: taruh file di public/photo.jpg (kosongkan '' kalau belum ada)
-  photo: 'public/gallery/ica.jpeg',
+  photo: '/gallery/ica.jpeg',
   // true = tampilkan animasi Three.js buatanmu (src/components/About3D.jsx) di bagian About, menggantikan foto
   useAbout3D: false,
   contacts: [
@@ -30,8 +30,8 @@ export const profile = {
 // Foto-foto yang muncul (pop-up) di sepanjang jalan taman, urut dari depan ke belakang. Maksimal 8.
 // Taruh foto di public/gallery/, lalu isi src seperti '/gallery/foto1.jpg'. Kalau kosong, muncul gambar contoh.
 export const journey = [
-  { year: '2023', title: 'First line of code', text: 'Started my Informatics degree and wrote my very first program .', src: 'public/gallery/preuni.jpeg' },
-  { year: '2021', title: 'Campus organization', text: 'Joined the Informatics Student Association, contributing to the External Relations Division and collaborating with fellow members.', src: 'public/gallery/puma1.jpeg' },
+  { year: '2023', title: 'First line of code', text: 'Started my Informatics degree and wrote my very first program .', src: '/gallery/preuni.jpeg' },
+  { year: '2021', title: 'Campus organization', text: 'Joined the Informatics Student Association, contributing to the External Relations Division and collaborating with fellow members.', src: '/gallery/puma1.jpeg' },
   { year: '2021', title: 'First web project', text: 'Built and shipped my first website for a real client.', src: '' },
   { year: '2022', title: 'Hackathon', text: 'Spent 24 hours building a prototype with friends.', src: '' },
   { year: '2023', title: 'Internship', text: 'Worked with a product team on a production app.', src: '' },

@@ -56,7 +56,7 @@ function ProjectModal({ project, onClose }) {
         <p className="pm-desc">{project.details || project.desc}</p>
         {project.images?.length > 0 && (
           <div className="pm-images">
-            {project.images.map((src) => <img key={src} src={src} alt="" />)}
+            {project.images.map((src) => <a key={src} href={src} target="_blank" rel="noreferrer"><img src={src} alt="" loading="lazy" /></a>)}
           </div>
         )}
         <div className="pm-row">

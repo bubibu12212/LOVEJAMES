@@ -9,6 +9,17 @@ const TOOL_COLORS = {
   mongodb: '#47a248', postman: '#ff6c37', notion: '#e6e6e6', 'android studio': '#3ddc84', colab: '#f9ab00',
   'scikit-learn': '#f7931e', latex: '#008080', excel: '#217346', mendeley: '#9d1620', dbeaver: '#382923', maze: '#2f6bff',
   javascript: '#f7df1e', 'three.js': '#ffffff', sql: '#4479a1',
+  fastapi: '#009688', sqlalchemy: '#d71f00', pydantic: '#e92063', 'meta llama': '#0467df', 'hugging face': '#ffd21e',
+  html5: '#e34f26', css: '#663399', json: '#2b2b2b', flask: '#3babc3', docker: '#2496ed', nginx: '#009639',
+  powershell: '#5391fe', 'power apps': '#742774', 'power automate': '#0066ff', sharepoint: '#0078d4', outlook: '#0078d4',
+}
+
+// logo tools (SVG dari Simple Icons, CC0) di public/logos/
+const LOGOS = {
+  python: 'python', fastapi: 'fastapi', sqlalchemy: 'sqlalchemy', pydantic: 'pydantic', mysql: 'mysql',
+  'meta llama': 'meta', 'hugging face': 'huggingface', javascript: 'javascript', html5: 'html5', css: 'css',
+  json: 'json', flask: 'flask', docker: 'docker', nginx: 'nginx', 'vs code': 'visualstudiocode', powershell: 'powershell',
+  'power apps': 'powerapps', 'power automate': 'powerautomate', sharepoint: 'microsoftsharepoint', outlook: 'microsoftoutlook',
 }
 
 export function toolColor(name) {
@@ -47,13 +58,27 @@ function finish(c) {
   return t
 }
 
-// isi bingkai: lambang huruf + nama tool
+// isi bingkai: logo (atau lambang huruf kalau tidak ada logo) + nama tool
 // style: 'light' (kertas putih), 'dark' (hologram), 'poster' (warna-warni)
 export function toolTexture(name, style = 'light') {
   const c = document.createElement('canvas')
   c.width = 512
   c.height = 512
-  const g = c.getContext('2d')
+  drawTool(c.getContext('2d'), name, style, null)
+  const t = finish(c)
+  const slug = LOGOS[name.toLowerCase()]
+  if (slug) {
+    const img = new Image()
+    img.onload = () => {
+      drawTool(c.getContext('2d'), name, style, img)
+      t.needsUpdate = true
+    }
+    img.src = `/logos/${slug}.svg`
+  }
+  return t
+}
+
+function drawTool(g, name, style, logo) {
   const col = toolColor(name)
   if (style === 'dark') {
     g.fillStyle = '#06111a'
@@ -71,25 +96,27 @@ export function toolTexture(name, style = 'light') {
     g.fillStyle = '#f5f1ea'
     g.fillRect(0, 0, 512, 512)
   }
-  // lingkaran lambang
+  // lingkaran lambang (pakai logo: lingkaran putih supaya logo berwarna tetap terbaca)
   g.beginPath()
   g.arc(256, 210, 120, 0, Math.PI * 2)
-  g.fillStyle = style === 'poster' ? 'rgba(255,255,255,0.92)' : col
+  g.fillStyle = logo ? '#ffffff' : style === 'poster' ? 'rgba(255,255,255,0.92)' : col
   g.fill()
-  if (style === 'dark') { g.lineWidth = 6; g.strokeStyle = '#ffffff'; g.globalAlpha = 0.5; g.stroke(); g.globalAlpha = 1 }
-  g.fillStyle = style === 'poster' ? col : '#ffffff'
-  if (style !== 'poster' && ['#ffca28', '#f7df1e', '#e6e6e6', '#ffffff', '#61dafb', '#3ddc84', '#f9ab00'].includes(col)) g.fillStyle = '#16181c'
-  g.font = '700 110px Inter, Arial, sans-serif'
+  if (style === 'dark') { g.lineWidth = 6; g.strokeStyle = logo ? col : '#ffffff'; g.globalAlpha = logo ? 1 : 0.5; g.stroke(); g.globalAlpha = 1 }
   g.textAlign = 'center'
   g.textBaseline = 'middle'
-  g.fillText(initials(name), 256, 214)
+  if (logo) g.drawImage(logo, 256 - 72, 210 - 72, 144, 144)
+  else {
+    g.fillStyle = style === 'poster' ? col : '#ffffff'
+    if (style !== 'poster' && ['#ffca28', '#f7df1e', '#e6e6e6', '#ffffff', '#61dafb', '#3ddc84', '#f9ab00'].includes(col)) g.fillStyle = '#16181c'
+    g.font = '700 110px Inter, Arial, sans-serif'
+    g.fillText(initials(name), 256, 214)
+  }
   g.fillStyle = style === 'light' ? '#1b1d21' : '#ffffff'
   g.font = '700 52px Inter, Arial, sans-serif'
   g.fillText(name, 256, 400, 470)
   g.font = '500 22px "JetBrains Mono", monospace'
   g.fillStyle = style === 'light' ? '#8a847a' : 'rgba(255,255,255,0.7)'
   g.fillText('TOOLS I USE', 256, 455)
-  return finish(c)
 }
 
 // layar utama project

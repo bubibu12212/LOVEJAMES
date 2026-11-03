@@ -297,7 +297,7 @@ body.dragging .stage canvas { cursor: grabbing; }
 .project-modal h3 { font-size: clamp(40px, 6vw, 72px); margin-bottom: 16px; }
 .pm-desc { color: #c4bdb2; line-height: 1.75; font-size: 15px; margin: 0 0 22px; }
 .pm-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-bottom: 22px; }
-.pm-images img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border: 1px solid var(--line); }
+.pm-images img { display: block; width: 100%; aspect-ratio: 16 / 10; object-fit: contain; background: rgba(0, 0, 0, 0.25); border: 1px solid var(--line); cursor: zoom-in; }
 .pm-row { display: flex; flex-wrap: wrap; gap: 24px 40px; margin-bottom: 26px; }
 .pm-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid var(--line); }
 @keyframes pop { from { opacity: 0; transform: scale(0.94) translateY(10px); } to { opacity: 1; transform: none; } }

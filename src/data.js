@@ -44,33 +44,42 @@ export const journey = [
 // interior = tema ruangan di dalam gedung (juga menentukan bentuk gedungnya):
 //   'house' | 'office' | 'apartment' | 'dorm' | 'lab' | 'studio'
 // tools = isi bingkai di dinding ruangan (tools yang kamu pakai di project itu)
+//   logonya diambil dari public/logos/ (daftar nama → file ada di LOGOS, src/screens.js); tanpa logo = inisial huruf
 // details = teks panjang di jendela project (muncul saat layar/TV di dalam ruangan diklik)
 // images = foto/screenshot project, contoh ['/projects/web1.jpg'] (taruh di public/projects/)
 // link = tombol "Open project" (kosongkan kalau belum ada)
 // Urutan = urutan gedung di taman: kiri-kanan bergantian dari depan ke belakang.
+const shots = (dir, n, pad = 1) => Array.from({ length: n }, (_, i) => `/projects/${dir}/${String(i + 1).padStart(pad, '0')}.jpg`)
+
 export const stations = [
-  { id: 'p1', interior: 'house', category: 'Web App', title: 'Web App Project',
-    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
-    details: 'Describe the project here: what problem it solves, what you built, your role, and what you learned along the way.',
-    tech: ['React', 'Node.js', 'MongoDB'], tools: ['VS Code', 'React', 'Node.js', 'Figma', 'Git', 'Postman'], images: [], link: '' },
-  { id: 'p2', interior: 'office', category: 'Mobile App', title: 'Mobile App Project',
-    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
-    details: 'Describe the project here: what problem it solves, what you built, your role, and what you learned along the way.',
-    tech: ['Flutter', 'Firebase'], tools: ['Flutter', 'Dart', 'Firebase', 'Android Studio', 'Figma', 'Git'], images: [], link: '' },
-  { id: 'p3', interior: 'apartment', category: 'UI/UX Design', title: 'UI/UX Case Study',
-    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
-    details: 'Describe the project here: what problem it solves, what you built, your role, and what you learned along the way.',
-    tech: ['Figma'], tools: ['Figma', 'FigJam', 'Notion', 'Maze'], images: [], link: '' },
-  { id: 'p4', interior: 'dorm', category: 'Database', title: 'Database System',
-    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
-    details: 'Describe the project here: what problem it solves, what you built, your role, and what you learned along the way.',
-    tech: ['SQL', 'PostgreSQL'], tools: ['PostgreSQL', 'MySQL', 'DBeaver', 'Laravel'], images: [], link: '' },
-  { id: 'p5', interior: 'lab', category: 'Machine Learning', title: 'ML / Data Project',
-    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
-    details: 'Describe the project here: what problem it solves, what you built, your role, and what you learned along the way.',
-    tech: ['Python', 'Pandas'], tools: ['Python', 'Pandas', 'scikit-learn', 'Jupyter', 'TensorFlow', 'Colab'], images: [], link: '' },
-  { id: 'p6', interior: 'studio', category: 'Final Thesis', title: 'Thesis Project',
-    desc: 'Replace with one line: the problem, your solution, and the tech stack.',
-    details: 'Describe the project here: what problem it solves, what you built, your role, and what you learned along the way.',
-    tech: ['Research'], tools: ['Python', 'LaTeX', 'Mendeley', 'Excel'], images: [], link: '' },
+  { id: 'hscode', interior: 'studio', category: 'Final Thesis · AI', title: 'DYX — HS Code AI Chatbot',
+    desc: 'AI chatbot that classifies goods into Indonesian HS Codes (BTKI 2022) with tariffs, licenses and a confidence score.',
+    details: 'DYX is an AI-powered web app that helps import/export teams classify goods into Indonesian HS Codes (BTKI 2022). Users can type a product name, use voice input, or upload an Excel file for batch processing. For each item, the app returns the HS Code, tariffs, import-license info, a confidence score, a risk level, and alternative codes. Classification runs as a layered pipeline: internal database lookup first, then BTKI keyword mapping, then validation by an LLM (Llama 3.3 70B via Groq). Security follows ISO 27001 practices, including OTP email verification, JWT auth, rate limiting, prompt-injection detection, and an admin dashboard with user logs, anomaly detection and an HS Code manager. The UI supports dark/light mode and English, Indonesian and Japanese. The pictures below are pages from the user guide.',
+    tech: ['Python', 'FastAPI', 'SQLAlchemy', 'Pydantic', 'MySQL (Aiven)', 'Groq · Llama 3.3 70B', 'Sentence-Transformers', 'RapidFuzz', 'openpyxl', 'JWT', 'HTML', 'CSS', 'JavaScript', 'Web Speech API'],
+    tools: ['Python', 'FastAPI', 'MySQL', 'Meta Llama', 'Hugging Face', 'SQLAlchemy', 'Pydantic', 'JavaScript'],
+    images: shots('hscode', 14, 2), link: '' },
+  { id: 'wifi', interior: 'lab', category: 'Networking · Own Project', title: 'Wi-Fi Network Device Scanner',
+    desc: 'Command-line scanner that finds every device on a Wi-Fi network and guesses what each one is.',
+    details: 'A Python command-line tool that scans the local Wi-Fi subnet (e.g. 253 addresses in a /24) using ping, TCP probes and the ARP cache, then identifies each device it finds: phones (including randomised MAC addresses), laptops/PCs and other devices, together with their IP, MAC address and hostname. It shows live progress, reports which method found each device, and saves the results to a JSON file. In the screenshot, MAC addresses and hostnames are blurred for privacy.',
+    tech: ['Python', 'ICMP Ping', 'TCP Probe', 'ARP', 'JSON'],
+    tools: ['Python', 'PowerShell', 'VS Code', 'JSON'],
+    images: shots('wifi', 1), link: '' },
+  { id: 'metadata', interior: 'dorm', category: 'Privacy · Web App', title: 'Metadata Cleaner',
+    desc: 'Pixel-art web app that reveals the hidden EXIF data in a photo, including GPS, and strips it in one click.',
+    details: 'A web application that helps users protect their privacy by detecting and removing hidden metadata from photos. Users upload an image, view the EXIF data it contains (camera info, timestamps, and GPS location), and download a clean copy with all metadata stripped. Key features: EXIF metadata extraction converted into a readable format; GPS location detection with a direct Google Maps link to show what the photo reveals; one-click metadata removal and download of the cleaned image; a REST API backend with unique IDs for each analysis result; and containerized deployment using Docker Compose (separate frontend and backend services).',
+    tech: ['Python', 'Flask', 'Pillow', 'piexif', 'HTML', 'CSS', 'JavaScript', 'Nginx', 'Docker'],
+    tools: ['Python', 'Flask', 'Docker', 'Nginx', 'JavaScript', 'HTML5', 'CSS'],
+    images: shots('metadata', 4), link: '' },
+  { id: 'po', interior: 'office', category: 'Internship · Web App', title: 'Purchase Order System',
+    desc: 'Web system that digitizes Purchase Order creation, approval, printing and archiving.',
+    details: 'A web-based system that digitizes Purchase Order creation, approval assignment, printing, and archiving, replacing a manual process. Built with vanilla JavaScript and a lightweight Python backend with a JSON-based REST API. Key features: multi-company support with tax ID and invoice address filled in automatically; auto-generated PO numbers using a monthly prefix and a running sequence that resets each month; amount-based approver assignment across 4 approval tiers; a dynamic item table with real-time total calculation; a print-ready PO document with an automatic print-to-archive workflow; and PO history and archive with search.',
+    tech: ['HTML', 'CSS', 'JavaScript', 'Python', 'JSON REST API'],
+    tools: ['HTML5', 'CSS', 'JavaScript', 'Python', 'JSON'],
+    images: shots('po', 5), link: '' },
+  { id: 'powerapps', interior: 'apartment', category: 'Internship · Low-code', title: 'Purchase Request Approval System',
+    desc: 'Power Apps + Power Automate system for DENSO Indonesia that routes purchase requests for approval by email.',
+    details: 'Purchase Request Approval System for DENSO Indonesia (Purchasing Dept). Built a digital Purchase Request (PR) system that replaced a manual, paper-based process. Users submit PRs through a Power Apps interface, and approvals are routed automatically by email through Power Automate, with SharePoint as the database. Key features: auto-generated PR numbers in sequence (e.g. PR-202608037 = year, month, running number); multi-item input with automatic total calculation; sequential email approval, where each approver is notified only after the previous one approves; amount-based approval routing, where low-value PRs stop at General Manager level while high-value PRs escalate further; and request tracking with status filters (Approval, Accepted, Completed, Rejected) and search.',
+    tech: ['Power Apps', 'Power Automate', 'SharePoint List', 'Outlook'],
+    tools: ['Power Apps', 'Power Automate', 'SharePoint', 'Outlook'],
+    images: shots('powerapps', 2), link: '' },
 ]

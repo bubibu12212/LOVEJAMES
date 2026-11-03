@@ -45,40 +45,77 @@ export const journey = [
 //   'house' | 'office' | 'apartment' | 'dorm' | 'lab' | 'studio'
 // tools = isi bingkai di dinding ruangan (tools yang kamu pakai di project itu)
 //   logonya diambil dari public/logos/ (daftar nama → file ada di LOGOS, src/screens.js); tanpa logo = inisial huruf
-// details = teks panjang di jendela project (muncul saat layar/TV di dalam ruangan diklik)
+// details = paragraf pembuka di jendela project (muncul saat layar/TV di dalam ruangan diklik)
+// features = daftar fitur utama (poin-poin di bawah paragraf)
 // images = foto/screenshot project, contoh ['/projects/web1.jpg'] (taruh di public/projects/)
-// link = tombol "Open project" (kosongkan kalau belum ada)
+// link = tombol "Open project" (kosongkan = tombolnya tidak muncul)
 // Urutan = urutan gedung di taman: kiri-kanan bergantian dari depan ke belakang.
 const shots = (dir, n, pad = 1) => Array.from({ length: n }, (_, i) => `/projects/${dir}/${String(i + 1).padStart(pad, '0')}.jpg`)
 
 export const stations = [
   { id: 'hscode', interior: 'studio', category: 'Final Thesis · AI', title: 'DYX — HS Code AI Chatbot',
     desc: 'AI chatbot that classifies goods into Indonesian HS Codes (BTKI 2022) with tariffs, licenses and a confidence score.',
-    details: 'DYX is an AI-powered web app that helps import/export teams classify goods into Indonesian HS Codes (BTKI 2022). Users can type a product name, use voice input, or upload an Excel file for batch processing. For each item, the app returns the HS Code, tariffs, import-license info, a confidence score, a risk level, and alternative codes. Classification runs as a layered pipeline: internal database lookup first, then BTKI keyword mapping, then validation by an LLM (Llama 3.3 70B via Groq). Security follows ISO 27001 practices, including OTP email verification, JWT auth, rate limiting, prompt-injection detection, and an admin dashboard with user logs, anomaly detection and an HS Code manager. The UI supports dark/light mode and English, Indonesian and Japanese. The pictures below are pages from the user guide.',
+    details: 'DYX is an AI-powered web app that helps import/export teams classify goods into Indonesian HS Codes (BTKI 2022). Users type a product name, speak it, or upload an Excel file, and get back the HS Code, tariffs, import-license info, a confidence score, a risk level and alternative codes. The pictures are pages from the user guide.',
+    features: [
+      'Layered classification: internal database lookup, then BTKI keyword mapping, then validation by an LLM (Llama 3.3 70B via Groq)',
+      'Semantic search with Sentence-Transformers and fuzzy matching with RapidFuzz',
+      'Voice input and batch classification from an Excel file',
+      'Security following ISO 27001 practices: OTP email verification, JWT auth, rate limiting and prompt-injection detection',
+      'Admin dashboard with user logs, anomaly detection and an HS Code manager',
+      'Dark/light mode and three languages (English, Indonesian, Japanese)',
+    ],
     tech: ['Python', 'FastAPI', 'SQLAlchemy', 'Pydantic', 'MySQL (Aiven)', 'Groq · Llama 3.3 70B', 'Sentence-Transformers', 'RapidFuzz', 'openpyxl', 'JWT', 'HTML', 'CSS', 'JavaScript', 'Web Speech API'],
     tools: ['Python', 'FastAPI', 'MySQL', 'Meta Llama', 'Hugging Face', 'SQLAlchemy', 'Pydantic', 'JavaScript'],
     images: shots('hscode', 14, 2), link: '' },
   { id: 'wifi', interior: 'lab', category: 'Networking · Own Project', title: 'Wi-Fi Network Device Scanner',
     desc: 'Command-line scanner that finds every device on a Wi-Fi network and guesses what each one is.',
-    details: 'A Python command-line tool that scans the local Wi-Fi subnet (e.g. 253 addresses in a /24) using ping, TCP probes and the ARP cache, then identifies each device it finds: phones (including randomised MAC addresses), laptops/PCs and other devices, together with their IP, MAC address and hostname. It shows live progress, reports which method found each device, and saves the results to a JSON file. In the screenshot, MAC addresses and hostnames are blurred for privacy.',
+    details: 'A Python command-line tool that scans the local Wi-Fi subnet and identifies every device it finds. In the screenshot, MAC addresses and hostnames are blurred for privacy.',
+    features: [
+      'Scans a whole /24 subnet (253 addresses) with ping, TCP probes and the ARP cache',
+      'Identifies phones (including randomised MAC addresses), laptops/PCs and other devices',
+      'Shows the IP, MAC address and hostname of each device, plus the method that found it',
+      'Live progress bar and results saved to a JSON file',
+    ],
     tech: ['Python', 'ICMP Ping', 'TCP Probe', 'ARP', 'JSON'],
     tools: ['Python', 'PowerShell', 'VS Code', 'JSON'],
     images: shots('wifi', 1), link: '' },
   { id: 'metadata', interior: 'dorm', category: 'Privacy · Web App', title: 'Metadata Cleaner',
     desc: 'Pixel-art web app that reveals the hidden EXIF data in a photo, including GPS, and strips it in one click.',
-    details: 'A web application that helps users protect their privacy by detecting and removing hidden metadata from photos. Users upload an image, view the EXIF data it contains (camera info, timestamps, and GPS location), and download a clean copy with all metadata stripped. Key features: EXIF metadata extraction converted into a readable format; GPS location detection with a direct Google Maps link to show what the photo reveals; one-click metadata removal and download of the cleaned image; a REST API backend with unique IDs for each analysis result; and containerized deployment using Docker Compose (separate frontend and backend services).',
+    details: 'A web application that helps users protect their privacy by detecting and removing hidden metadata from photos. Users upload an image, see what it reveals (camera info, timestamps and GPS location), and download a clean copy.',
+    features: [
+      'EXIF metadata extraction converted into a readable format',
+      'GPS location detection with a direct Google Maps link to show what the photo reveals',
+      'One-click metadata removal and download of the cleaned image',
+      'REST API backend with a unique ID for each analysis result',
+      'Containerized with Docker Compose (separate frontend and backend services)',
+    ],
     tech: ['Python', 'Flask', 'Pillow', 'piexif', 'HTML', 'CSS', 'JavaScript', 'Nginx', 'Docker'],
     tools: ['Python', 'Flask', 'Docker', 'Nginx', 'JavaScript', 'HTML5', 'CSS'],
     images: shots('metadata', 4), link: '' },
   { id: 'po', interior: 'office', category: 'Internship · Web App', title: 'Purchase Order System',
     desc: 'Web system that digitizes Purchase Order creation, approval, printing and archiving.',
-    details: 'A web-based system that digitizes Purchase Order creation, approval assignment, printing, and archiving, replacing a manual process. Built with vanilla JavaScript and a lightweight Python backend with a JSON-based REST API. Key features: multi-company support with tax ID and invoice address filled in automatically; auto-generated PO numbers using a monthly prefix and a running sequence that resets each month; amount-based approver assignment across 4 approval tiers; a dynamic item table with real-time total calculation; a print-ready PO document with an automatic print-to-archive workflow; and PO history and archive with search.',
+    details: 'A web-based system that digitizes Purchase Order creation, approval assignment, printing and archiving, replacing a manual process. Built with vanilla JavaScript and a lightweight Python backend with a JSON-based REST API.',
+    features: [
+      'Multi-company support with tax ID and invoice address filled in automatically',
+      'Auto-generated PO numbers with a monthly prefix and a running sequence that resets each month',
+      'Amount-based approver assignment across 4 approval tiers',
+      'Dynamic item table with real-time total calculation',
+      'Print-ready PO document with an automatic print-to-archive workflow',
+      'PO history and archive with search',
+    ],
     tech: ['HTML', 'CSS', 'JavaScript', 'Python', 'JSON REST API'],
     tools: ['HTML5', 'CSS', 'JavaScript', 'Python', 'JSON'],
     images: shots('po', 5), link: '' },
   { id: 'powerapps', interior: 'apartment', category: 'Internship · Low-code', title: 'Purchase Request Approval System',
     desc: 'Power Apps + Power Automate system for DENSO Indonesia that routes purchase requests for approval by email.',
-    details: 'Purchase Request Approval System for DENSO Indonesia (Purchasing Dept). Built a digital Purchase Request (PR) system that replaced a manual, paper-based process. Users submit PRs through a Power Apps interface, and approvals are routed automatically by email through Power Automate, with SharePoint as the database. Key features: auto-generated PR numbers in sequence (e.g. PR-202608037 = year, month, running number); multi-item input with automatic total calculation; sequential email approval, where each approver is notified only after the previous one approves; amount-based approval routing, where low-value PRs stop at General Manager level while high-value PRs escalate further; and request tracking with status filters (Approval, Accepted, Completed, Rejected) and search.',
+    details: 'Built for the Purchasing Dept of DENSO Indonesia to replace a manual, paper-based Purchase Request (PR) process. Users submit PRs through a Power Apps interface, approvals are routed automatically by email through Power Automate, and SharePoint is the database.',
+    features: [
+      'Auto-generated PR numbers in sequence (e.g. PR-202608037 = year, month, running number)',
+      'Multi-item input with automatic total calculation',
+      'Sequential email approval: each approver is notified only after the previous one approves',
+      'Amount-based routing: low-value PRs stop at General Manager level, high-value PRs escalate further',
+      'Request tracking with status filters (Approval, Accepted, Completed, Rejected) and search',
+    ],
     tech: ['Power Apps', 'Power Automate', 'SharePoint List', 'Outlook'],
     tools: ['Power Apps', 'Power Automate', 'SharePoint', 'Outlook'],
     images: shots('powerapps', 2), link: '' },

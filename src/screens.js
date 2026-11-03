@@ -149,10 +149,14 @@ export function projectTexture(p, accent, transparent = false) {
   g.fillStyle = '#b8c2cc'
   g.font = '400 34px Inter, Arial, sans-serif'
   wrap(g, p.desc, 80, 390, 1050, 48, 3)
-  // chip teknologi
+  // chip teknologi (yang tidak muat diringkas jadi "+N")
   let x = 80
   g.font = '600 26px "JetBrains Mono", monospace'
-  for (const t of p.tech) {
+  const plusW = g.measureText('+00').width + 40
+  for (const [k, tech] of p.tech.entries()) {
+    const rest = p.tech.length - k
+    const fits = x + g.measureText(tech).width + 40 <= 1200 - (rest > 1 ? plusW + 14 : 0)
+    const t = fits ? tech : `+${rest}`
     const w = g.measureText(t).width + 40
     g.strokeStyle = accent
     g.lineWidth = 2
@@ -160,6 +164,7 @@ export function projectTexture(p, accent, transparent = false) {
     g.fillStyle = '#e9eef3'
     g.fillText(t, x + 20, 575)
     x += w + 14
+    if (!fits) break
   }
   g.fillStyle = accent
   g.font = '700 28px "JetBrains Mono", monospace'

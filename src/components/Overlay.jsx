@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useProgress } from '@react-three/drei'
 import { profile } from '../data'
 import { photoSrc, buildingSpots } from '../world'
@@ -45,39 +45,141 @@ function Lightbox({ photo, onClose }) {
   )
 }
 
+// galeri geser: swipe (layar sentuh), drag mouse, tombol panah, atau tombol ← → di keyboard.
+// Klik gambar = buka layar penuh (onZoom), tetap di halaman ini.
+function Gallery({ images, start = 0, big = false, onZoom, onIndex }) {
+  const track = useRef()
+  const drag = useRef(null)
+  const [i, setI] = useState(start)
+  const last = images.length - 1
+
+  const go = useCallback((n) => {
+    const el = track.current
+    const k = Math.max(0, Math.min(last, n))
+    el.scrollTo({ left: k * el.clientWidth, behavior: 'smooth' })
+    setI(k)
+  }, [last])
+
+  useEffect(() => {
+    const el = track.current
+    el.scrollLeft = start * el.clientWidth
+  }, [start])
+
+  useEffect(() => { onIndex?.(i) }, [i, onIndex])
+
+  // panah keyboard; capture + stopPropagation supaya karakter tidak ikut berjalan
+  useEffect(() => {
+    const key = (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+      e.stopPropagation()
+      e.preventDefault()
+      go(i + (e.key === 'ArrowRight' ? 1 : -1))
+    }
+    window.addEventListener('keydown', key, true)
+    return () => window.removeEventListener('keydown', key, true)
+  }, [go, i])
+
+  const onScroll = () => {
+    if (drag.current) return
+    const el = track.current
+    setI(Math.round(el.scrollLeft / el.clientWidth))
+  }
+
+  // drag dengan mouse (sentuhan sudah ditangani browser lewat scroll-snap)
+  const down = (e) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return
+    drag.current = { x: e.clientX, left: track.current.scrollLeft, moved: false }
+    track.current.classList.add('dragging')
+  }
+  const move = (e) => {
+    const d = drag.current
+    if (!d) return
+    const dx = e.clientX - d.x
+    if (Math.abs(dx) > 5) d.moved = true
+    track.current.scrollLeft = d.left - dx
+  }
+  const up = (e) => {
+    const d = drag.current
+    if (!d) return
+    drag.current = null
+    track.current.classList.remove('dragging')
+    const dx = e.clientX - d.x
+    if (!d.moved) { onZoom?.(i); return }
+    go(Math.abs(dx) > track.current.clientWidth * 0.12 ? i - Math.sign(dx) : i)
+  }
+
+  return (
+    <div className={`gal ${big ? 'gal-big' : ''}`}>
+      <div className="gal-frame">
+        <div className="gal-track" ref={track} onScroll={onScroll}
+          onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerLeave={up}
+          onClick={(e) => { if (e.pointerType !== 'mouse' && e.detail !== 0) onZoom?.(i) }}>
+          {images.map((src, k) => (
+            <div className="gal-slide" key={src}>
+              <img src={src} alt="" draggable={false} loading={Math.abs(k - start) < 2 ? 'eager' : 'lazy'} />
+            </div>
+          ))}
+        </div>
+        {last > 0 && (
+          <>
+            <button className="gal-nav prev" onClick={() => go(i - 1)} disabled={i === 0} aria-label="Previous image">‹</button>
+            <button className="gal-nav next" onClick={() => go(i + 1)} disabled={i === last} aria-label="Next image">›</button>
+          </>
+        )}
+        <span className="gal-count mono">{i + 1} / {images.length}</span>
+      </div>
+      {last > 0 && (
+        <div className="gal-dots">
+          {images.map((src, k) => <button key={src} className={k === i ? 'on' : ''} onClick={() => go(k)} aria-label={`Image ${k + 1}`} />)}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function ProjectModal({ project, onClose }) {
-  useEscape(onClose)
+  const [zoom, setZoom] = useState(null) // index gambar yang dibuka layar penuh
+  const [at, setAt] = useState(0)
+  // Esc: tutup layar penuh dulu, baru jendela project
+  useEscape(useCallback(() => (zoom !== null ? setZoom(null) : onClose()), [zoom, onClose]))
   const n = String(project.index + 1).padStart(2, '0')
+  const images = project.images ?? []
   return (
     <div className="lightbox" onClick={onClose}>
       <article className="project-modal" onClick={(e) => e.stopPropagation()} style={{ '--accent': project.accent }}>
         <p className="mono pm-cat"><span>{n}</span> {project.category}</p>
         <h3 className="display">{project.title}</h3>
-        <p className="pm-desc">{project.details || project.desc}</p>
-        {project.images?.length > 0 && (
-          <div className="pm-images">
-            {project.images.map((src) => <a key={src} href={src} target="_blank" rel="noreferrer"><img src={src} alt="" loading="lazy" /></a>)}
-          </div>
-        )}
+        <p className="pm-lead">{project.desc}</p>
+
         <div className="pm-row">
           <div>
             <p className="mono label">Tech stack</p>
-            <ul className="chips">{project.tech.map((t) => <li key={t}>{t}</li>)}</ul>
+            <ul className="chips pm-chips">{project.tech.map((t) => <li key={t}>{t}</li>)}</ul>
           </div>
-          {project.tools?.length > 0 && (
-            <div>
-              <p className="mono label">Tools</p>
-              <ul className="chips">{project.tools.map((t) => <li key={t}>{t}</li>)}</ul>
-            </div>
-          )}
         </div>
+
+        {images.length > 0 && zoom === null && <Gallery images={images} start={at} onIndex={setAt} onZoom={setZoom} />}
+
+        <p className="mono label">About the project</p>
+        <p className="pm-desc">{project.details}</p>
+        {project.features?.length > 0 && (
+          <ul className="pm-features">{project.features.map((f) => <li key={f}>{f}</li>)}</ul>
+        )}
+
         <div className="pm-actions">
-          {project.link
-            ? <a className="btn red" href={project.link} target="_blank" rel="noreferrer">Open project ↗</a>
-            : <span className="mono muted">Link coming soon</span>}
+          {project.link && <a className="btn red" href={project.link} target="_blank" rel="noreferrer">Open project ↗</a>}
           <button className="btn ghost" onClick={onClose}>Close <kbd>Esc</kbd></button>
         </div>
       </article>
+
+      {zoom !== null && (
+        <div className="viewer" onClick={(e) => { e.stopPropagation(); setZoom(null) }}>
+          <div className="viewer-inner" onClick={(e) => e.stopPropagation()}>
+            <Gallery images={images} start={zoom} big onIndex={setAt} />
+          </div>
+          <button className="btn ghost lightbox-close" onClick={(e) => { e.stopPropagation(); setZoom(null) }}>Close <kbd>Esc</kbd></button>
+        </div>
+      )}
     </div>
   )
 }

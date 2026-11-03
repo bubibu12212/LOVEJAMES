@@ -345,8 +345,8 @@ function ApartmentRoom(props) {
       {/* meja kerja + monitor */}
       <B p={[0, 0.76, R - 7]} s={[3.8, 0.06, 1.4]} c="#d9cdb9" r={0.5} />
       {[-1.8, 1.8].map((x) => <B key={x} p={[x, 0.38, R - 7]} s={[0.06, 0.76, 1.3]} c="#222" m={0.5} />)}
-      <B p={[0, 0.95, R - 7.35]} s={[0.1, 0.35, 0.1]} c="#222" m={0.6} />
-      <MainScreen {...props} w={2.2} h={1.24} position={[0, 1.75, R - 7.4]} />
+      {/* TV besar menempel di dinding, di atas meja */}
+      <MainScreen {...props} w={3.4} h={1.91} position={[0, 2.25, BACK + 0.08]} />
       {/* jendela besar ke kota malam */}
       <mesh position={[halfW - 0.03, 2.1, R - 3.5]} rotation-y={-Math.PI / 2}>
         <planeGeometry args={[5, 2.6]} />
@@ -359,7 +359,7 @@ function ApartmentRoom(props) {
       {/* sudut tidur, dapur kecil, rak buku, beanbag dekat jendela */}
       <SideTable p={[-2.85, 0, R - 3.0]} items={false} c="#5a4636" />
       <Lamp p={[-2.85, 0.58, R - 3.0]} h={0.3} light />
-      <Rug p={[-1.2, 0, R - 0.6]} w={2.6} d={2.2} c="#d8c7b0" border="#a88f70" />
+      <Rug p={[3.3, 0, R - 2.4]} w={3.4} d={2.8} c="#d8c7b0" border="#a88f70" />
       <Chair p={[0, 0, R - 5.95]} rot={Math.PI} office />
       <Counter p={[4.8, 0, R + 6.9]} rot={Math.PI} w={3.2} />
       {[4, 5.6].map((x) => (
@@ -467,11 +467,12 @@ function LabRoom(props) {
         <circleGeometry args={[1.05, 40]} />
         <meshBasicMaterial color="#4fffb0" transparent opacity={0.25} toneMapped={false} />
       </mesh>
-      <mesh ref={holo} position={[0, 1.9, R + 1.5]}>
-        <icosahedronGeometry args={[0.6, 1]} />
+      {/* hologram dibuat lebih kecil & rendah, layar dinaikkan: dari pintu layar tidak tertutup */}
+      <mesh ref={holo} position={[0, 1.55, R + 1.5]}>
+        <icosahedronGeometry args={[0.42, 1]} />
         <meshBasicMaterial color="#4fffb0" wireframe transparent opacity={0.8} toneMapped={false} />
       </mesh>
-      <MainScreen {...props} w={4.2} h={2.36} position={[0, 2.1, BACK + 0.08]} />
+      <MainScreen {...props} w={4.2} h={2.36} position={[0, 2.6, BACK + 0.08]} />
       <pointLight position={[0, 2, R + 1.5]} intensity={5} distance={6} color="#4fffb0" />
       {/* meja kerja dengan dua monitor, kursi, papan tulis, lampu strip */}
       <group position={[6.2, 0, R + 4]}>
@@ -504,7 +505,7 @@ function StudioRoom(props) {
       <B p={[0, 0.9, R - 6.6]} s={[4.8, 0.07, 1.8]} c="#e7e1d6" r={0.5} />
       {[-2.3, 2.3].map((x) => <B key={x} p={[x, 0.45, R - 6.6]} s={[0.08, 0.9, 1.7]} c="#222" m={0.5} />)}
       <B p={[0, 1.1, R - 7.05]} s={[0.1, 0.35, 0.1]} c="#222" m={0.6} />
-      <MainScreen {...props} w={2.6} h={1.46} position={[0, 1.95, R - 7.1]} />
+      <MainScreen {...props} w={3.2} h={1.8} position={[0, 2.15, R - 7.1]} />
       <B p={[1.7, 0.95, R - 6.3]} s={[0.9, 0.02, 0.6]} c="#1b1c1f" m={0.4} r={0.3} />
       {/* kuda-kuda lukis */}
       <group position={[4.8, 0, R - 1.4]} rotation-y={-0.6}>
@@ -513,9 +514,9 @@ function StudioRoom(props) {
         <B p={[-0.1, 1.45, 0.08]} s={[0.5, 0.3, 0.01]} c="#ff7eb6" cast={false} />
         <B p={[0.2, 1.3, 0.08]} s={[0.3, 0.35, 0.01]} c="#5fe0ff" cast={false} />
       </group>
-      {/* lampu gantung */}
-      {[-2.5, 0, 2.5].map((x) => (
-        <group key={x} position={[x, height, R - 3]}>
+      {/* lampu gantung di atas meja, di kiri-kanan layar (tidak menutupi layar & jam) */}
+      {[-2.3, 2.3].map((x) => (
+        <group key={x} position={[x, height, R - 6.2]}>
           <B p={[0, -0.5, 0]} s={[0.02, 1, 0.02]} c="#222" cast={false} />
           <mesh position={[0, -1.1, 0]}>
             <coneGeometry args={[0.3, 0.3, 20, 1, true]} />
@@ -524,7 +525,7 @@ function StudioRoom(props) {
         </group>
       ))}
       <Plant p={[-5.9, 0, R - 6.9]} s={1.4} />
-      <Plant p={[-5.9, 0, R + 4]} />
+      <Plant p={[-5.9, 0, R + 5.5]} />
       {/* sofa, rak buku, papan inspirasi, tripod kamera */}
       <Rug p={[-4.4, 0, R + 3.2]} w={3.2} d={3.2} c="#e9d8c4" border="#c9b79a" round />
       <Armchair p={[-5.9, 0, R + 2.6]} rot={Math.PI / 2} c="#c9b79a" />
@@ -542,7 +543,8 @@ function StudioRoom(props) {
         ))}
       </group>
       <group position={[2.8, 0, R + 2]}>
-        {[0, 2.1, 4.2].map((a) => <B key={a} p={[Math.sin(a) * 0.22, 0.6, Math.cos(a) * 0.22]} s={[0.03, 1.25, 0.03]} c="#222" rotation={[Math.cos(a) * 0.18, 0, -Math.sin(a) * 0.18]} />)}
+        {/* kaki tripod: menyatu di atas, melebar di bawah */}
+        {[0, 2.1, 4.2].map((a) => <B key={a} p={[Math.sin(a) * 0.12, 0.6, Math.cos(a) * 0.12]} s={[0.03, 1.25, 0.03]} c="#222" rotation={[-Math.cos(a) * 0.2, 0, Math.sin(a) * 0.2]} />)}
         <B p={[0, 1.3, 0]} s={[0.3, 0.2, 0.18]} c="#1b1c1f" m={0.3} />
         <mesh position={[0, 1.3, -0.14]} rotation-x={Math.PI / 2}>
           <cylinderGeometry args={[0.07, 0.07, 0.12, 16]} />

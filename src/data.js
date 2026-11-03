@@ -30,15 +30,15 @@ export const profile = {
 // Foto-foto yang muncul (pop-up) di sepanjang jalan taman, urut dari depan ke belakang. Maksimal 8.
 // Taruh foto di public/gallery/, lalu isi src seperti '/gallery/foto1.jpg'. Kalau kosong, muncul gambar contoh.
 export const journey = [
-  { year: '2020', title: 'First line of code', text: 'Started my Informatics degree and wrote my very first program.', src: '' },
-  { year: '2021', title: 'Campus organization', text: 'Joined a student tech community and learned to work in a team.', src: '' },
+  { year: '2023', title: 'First line of code', text: 'Started my Informatics degree and wrote my very first program .', src: 'public/gallery/preuni.jpeg' },
+  { year: '2021', title: 'Campus organization', text: 'Joined the Informatics Student Association, contributing to the External Relations Division and collaborating with fellow members.', src: 'public/gallery/puma1.jpeg' },
   { year: '2021', title: 'First web project', text: 'Built and shipped my first website for a real client.', src: '' },
   { year: '2022', title: 'Hackathon', text: 'Spent 24 hours building a prototype with friends.', src: '' },
   { year: '2023', title: 'Internship', text: 'Worked with a product team on a production app.', src: '' },
   { year: '2023', title: 'Teaching assistant', text: 'Helped juniors learn programming fundamentals.', src: '' },
   { year: '2024', title: 'Final thesis', text: 'Researched and built my final thesis project.', src: '' },
   { year: '2025', title: 'Graduation day', text: 'Graduated — and ready for what comes next.', src: '' },
-]
+] 
 
 // ===================== PROJECT (gedung yang bisa dimasuki) =====================
 // interior = tema ruangan di dalam gedung (juga menentukan bentuk gedungnya):

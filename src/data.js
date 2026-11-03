@@ -3,14 +3,14 @@
 export const profile = {
   name: 'Salsa Ica Indriani',
   short: 'SALSA',
-  role: 'Informatics Graduate — Software Developer',
-  tagline: "Hi, I'm Salsa — a recent Informatics graduate passionate about software development, technology, and creating innovative digital solutions.",
+  role: 'Computer Science Graduate — Software Developer',
+  tagline: "Hi, I'm Salsa — a recent Computer Science graduate passionate about software development, technology, and creating innovative digital solutions.",
   aboutTitle: 'Building digital things that matter',
   about: [
-    "I'm Salsa, a recent Informatics graduate passionate about software development and technology. I love turning ideas into clean, useful digital products — from the logic behind the scenes to the interface people actually touch.",
+    "I'm Salsa, a recent Computer Science graduate passionate about software development and technology. I love turning ideas into clean, useful digital products — from the logic behind the scenes to the interface people actually touch.",
   ],
   facts: [
-    { label: 'Education', value: 'B.Sc. Informatics' },
+    { label: 'Education', value: 'B.Sc. Compputer Science' },
     { label: 'Focus', value: 'Software Development' },
     { label: 'Based in', value: 'Indonesia' },
   ],
@@ -20,9 +20,9 @@ export const profile = {
   // true = tampilkan animasi Three.js buatanmu (src/components/About3D.jsx) di bagian About, menggantikan foto
   useAbout3D: false,
   contacts: [
-    { label: 'Email', text: 'your.email@gmail.com', href: '#' },       // contoh: 'mailto:nama@email.com'
-    { label: 'LinkedIn', text: 'linkedin.com/in/username', href: '#' },
-    { label: 'GitHub', text: 'github.com/username', href: '#' },
+    { label: 'Email', text: 'icasalsaindriani13@gmail.com', href: 'mailto:icasalsaindriani13@gmail.com' },   
+    { label: 'LinkedIn', text: 'linkedin.com/in/salsa-ica-indriani/', href: 'https://linkedin.com/in/salsa-ica-indriani/' },
+    { label: 'GitHub', text: 'github.com/bubibu12212', href: 'https://github.com/bubibu12212' },
   ],
 }
 
@@ -32,10 +32,10 @@ export const profile = {
 export const journey = [
   { year: '2023', title: 'First line of code', text: 'Started my Informatics degree and wrote my very first program .', src: '/gallery/preuni.jpeg' },
   { year: '2021', title: 'Campus organization', text: 'Joined the Informatics Student Association, contributing to the External Relations Division and collaborating with fellow members.', src: '/gallery/puma1.jpeg' },
-  { year: '2021', title: 'First web project', text: 'Built and shipped my first website for a real client.', src: '' },
-  { year: '2022', title: 'Hackathon', text: 'Spent 24 hours building a prototype with friends.', src: '' },
-  { year: '2023', title: 'Internship', text: 'Worked with a product team on a production app.', src: '' },
-  { year: '2023', title: 'Teaching assistant', text: 'Helped juniors learn programming fundamentals.', src: '' },
+  { year: '2021', title: 'Project Manager Comparative Study', text: 'Built and shipped my first website for a real client.', src: '' },
+  { year: '2022', title: 'Event Organizer Cultural Festival', text: 'Spent 24 hours building a prototype with friends.', src: '' },
+  { year: '2023', title: 'Campus organization', text: 'Worked with a product team on a production app.', src: '' },
+  { year: '2023', title: 'Internship at PT Denso Indonesia', text: 'Helped juniors learn programming fundamentals.', src: '' },
   { year: '2024', title: 'Final thesis', text: 'Researched and built my final thesis project.', src: '' },
   { year: '2025', title: 'Graduation day', text: 'Graduated — and ready for what comes next.', src: '' },
 ] 

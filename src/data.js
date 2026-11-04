@@ -3,14 +3,14 @@
 export const profile = {
   name: 'Salsa Ica Indriani',
   short: 'SALSA',
-  role: 'Informatics Graduate — Software Developer',
-  tagline: "Hi, I'm Salsa — a recent Informatics graduate passionate about software development, technology, and creating innovative digital solutions.",
+  role: 'Computer Science Graduate — Software Developer',
+  tagline: "Hi, I'm Salsa — a recent Computer Science graduate passionate about software development, technology, and creating innovative digital solutions.",
   aboutTitle: 'Building digital things that matter',
   about: [
-    "I'm Salsa, a recent Informatics graduate passionate about software development and technology. I love turning ideas into clean, useful digital products — from the logic behind the scenes to the interface people actually touch.",
+    "I'm Salsa, a recent Computer Science graduate passionate about software development and technology. I love turning ideas into clean, useful digital products — from the logic behind the scenes to the interface people actually touch.",
   ],
   facts: [
-    { label: 'Education', value: 'B.Sc. Informatics' },
+    { label: 'Education', value: 'B.Sc. Computer Science' },
     { label: 'Focus', value: 'Software Development' },
     { label: 'Based in', value: 'Indonesia' },
   ],
@@ -20,9 +20,9 @@ export const profile = {
   // true = tampilkan animasi Three.js buatanmu (src/components/About3D.jsx) di bagian About, menggantikan foto
   useAbout3D: false,
   contacts: [
-    { label: 'Email', text: 'your.email@gmail.com', href: '#' },       // contoh: 'mailto:nama@email.com'
-    { label: 'LinkedIn', text: 'linkedin.com/in/username', href: '#' },
-    { label: 'GitHub', text: 'github.com/username', href: '#' },
+    { label: 'Email', text: 'icasalsaindriani13@gmail.com', href: 'mailto:icasalsaindriani13@gmail.com' },   
+    { label: 'LinkedIn', text: 'linkedin.com/in/salsa-ica-indriani/', href: 'https://linkedin.com/in/salsa-ica-indriani/' },
+    { label: 'GitHub', text: 'github.com/bubibu12212', href: 'https://github.com/bubibu12212' },
   ],
 }
 
@@ -34,20 +34,20 @@ export const profile = {
 // Judul maksimal ±25 huruf supaya muat satu baris di panel.
 export const journey = [
   { year: '2023', title: 'Day One at Pre-Uni',
-    text: 'New blazer, new friends, new city of code. Pre-University at President University was where my Informatics story officially began.',
+    text: 'New blazer, new friends, new city of code. Pre-University at President University was where my Computer Science story officially began.',
     src: '/gallery/journey/01-preuni.jpg' },
   { year: '2023', title: 'Hello, PUMA Informatics',
     text: 'Joined the Informatics Student Association in External Relations: the bridge between our campus and other organizations and companies.',
     src: '/gallery/journey/02-external.jpg' },
   { year: '2024', title: 'PM · Comparative Study',
     text: 'Led PUMA Informatics\' comparative study visit to Universitas Padjadjaran (UNPAD) as Project Manager, from first plan to the big day.',
-    src: '' },
+    src: '/gallery/journey/03-unpad.jpg' },
   { year: '2024', title: 'Vice Head, Technopreneur',
     text: 'Moved to the Technopreneur Division as Vice Head, keeping the books in order: cash records, receivables and installment tracking.',
-    src: '' },
+    src: '/gallery/journey/04-technopreneur.jpg' },
   { year: '2024', title: 'Event Organizer · Culfest',
     text: 'Part of the organizing team behind Culfest, the BEM campus festival that brought together 1,000+ participants.',
-    src: '' },
+    src: '/gallery/journey/05-culfest.jpg' },
   { year: '2025', title: 'Intern at DENSO Indonesia',
     text: 'A year in the procurement team, turning paper into apps: an E-PO web app, a Power Apps PR system and automation scripts.',
     src: '/gallery/journey/06-denso.jpg' },

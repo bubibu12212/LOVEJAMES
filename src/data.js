@@ -28,17 +28,36 @@ export const profile = {
 
 // ===================== CERITA PERJALANAN (di taman) =====================
 // Foto-foto yang muncul (pop-up) di sepanjang jalan taman, urut dari depan ke belakang. Maksimal 8.
-// Taruh foto di public/gallery/, lalu isi src seperti '/gallery/foto1.jpg'. Kalau kosong, muncul gambar contoh.
+// Taruh foto di public/gallery/journey/ (ukuran 3:2, mis. 1200x800 supaya semua bingkai rapi),
+// lalu isi src seperti '/gallery/journey/03-unpad.jpg'. Kalau kosong, muncul kartu "photo coming soon".
+// soon = tanggal untuk acara yang belum terjadi (kartu "Coming soon").
+// Judul maksimal ±25 huruf supaya muat satu baris di panel.
 export const journey = [
-  { year: '2023', title: 'First line of code', text: 'Started my Informatics degree and wrote my very first program .', src: '/gallery/preuni.jpeg' },
-  { year: '2021', title: 'Campus organization', text: 'Joined the Informatics Student Association, contributing to the External Relations Division and collaborating with fellow members.', src: '/gallery/puma1.jpeg' },
-  { year: '2021', title: 'First web project', text: 'Built and shipped my first website for a real client.', src: '' },
-  { year: '2022', title: 'Hackathon', text: 'Spent 24 hours building a prototype with friends.', src: '' },
-  { year: '2023', title: 'Internship', text: 'Worked with a product team on a production app.', src: '' },
-  { year: '2023', title: 'Teaching assistant', text: 'Helped juniors learn programming fundamentals.', src: '' },
-  { year: '2024', title: 'Final thesis', text: 'Researched and built my final thesis project.', src: '' },
-  { year: '2025', title: 'Graduation day', text: 'Graduated — and ready for what comes next.', src: '' },
-] 
+  { year: '2023', title: 'Day One at Pre-Uni',
+    text: 'New blazer, new friends, new city of code. Pre-University at President University was where my Informatics story officially began.',
+    src: '/gallery/journey/01-preuni.jpg' },
+  { year: '2023', title: 'Hello, PUMA Informatics',
+    text: 'Joined the Informatics Student Association in External Relations: the bridge between our campus and other organizations and companies.',
+    src: '/gallery/journey/02-external.jpg' },
+  { year: '2024', title: 'PM · Comparative Study',
+    text: 'Led PUMA Informatics\' comparative study visit to Universitas Padjadjaran (UNPAD) as Project Manager, from first plan to the big day.',
+    src: '' },
+  { year: '2024', title: 'Vice Head, Technopreneur',
+    text: 'Moved to the Technopreneur Division as Vice Head, keeping the books in order: cash records, receivables and installment tracking.',
+    src: '' },
+  { year: '2024', title: 'Event Organizer · Culfest',
+    text: 'Part of the organizing team behind Culfest, the BEM campus festival that brought together 1,000+ participants.',
+    src: '' },
+  { year: '2025', title: 'Intern at DENSO Indonesia',
+    text: 'A year in the procurement team, turning paper into apps: an E-PO web app, a Power Apps PR system and automation scripts.',
+    src: '/gallery/journey/06-denso.jpg' },
+  { year: '2026', title: 'Thesis Defended',
+    text: 'Built DYX, an AI chatbot that classifies goods into Indonesian HS Codes, then defended it and walked out with flowers in hand.',
+    src: '/gallery/journey/07-thesis.jpg' },
+  { year: '2026', title: 'Graduation Day', soon: '13 . 12 . 2026',
+    text: 'Coming soon on 13 December 2026: the last page of this chapter, and the first page of the next one.',
+    src: '' },
+]
 
 // ===================== PROJECT (gedung yang bisa dimasuki) =====================
 // interior = tema ruangan di dalam gedung (juga menentukan bentuk gedungnya):

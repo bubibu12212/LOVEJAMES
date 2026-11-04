@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Text } from '@react-three/drei'
 import * as THREE from 'three'
@@ -7,6 +7,8 @@ import { journeySpots, photoSrc } from '../world'
 const PW = 2.5      // lebar foto
 const PH = 1.66      // tinggi foto
 const PANEL_Y = 2.45
+const TEXT_TOP = 0.1 - PH / 2 - 0.12   // tepi atas judul (di bawah foto)
+const PANEL_TOP = -0.12 + (PH + 1.04) / 2 // tepi atas latar gelap
 const HOLO = '#7fe8ff'
 const PINK = '#ff7eb6'
 const worldPos = new THREE.Vector3()
@@ -60,6 +62,27 @@ function Station({ spot, activeRef }) {
   const chip = useRef()
   const anim = useRef({ s: 0, v: 0 })
   const lampX = spot.side * 0.6
+  const backdrop = useRef()
+  const body = useRef()
+  const sizes = useRef({ title: 0.2, body: 0.4 })
+
+  // tinggi judul & teks baru diketahui setelah huruf dirender (onSync):
+  // teks diletakkan tepat di bawah judul, latar gelap ikut memanjang sampai teks terakhir
+  const layout = useCallback((key, t) => {
+    const bounds = t.textRenderInfo?.blockBounds
+    if (!bounds) return
+    const s = sizes.current
+    s[key] = bounds[3] - bounds[1]
+    const bodyTop = TEXT_TOP - s.title - 0.08
+    if (body.current) body.current.position.y = bodyTop
+    const bottom = bodyTop - s.body - 0.2
+    const b = backdrop.current
+    if (!b) return
+    b.scale.y = PANEL_TOP - bottom
+    b.position.y = (PANEL_TOP + bottom) / 2
+  }, [])
+  const onTitleSync = useCallback((t) => layout('title', t), [layout])
+  const onBodySync = useCallback((t) => layout('body', t), [layout])
 
   useFrame((state, rawDt) => {
     const dt = Math.min(rawDt, 0.05)
@@ -131,8 +154,8 @@ function Station({ spot, activeRef }) {
       {/* panel hologram */}
       <group position={[-spot.side * 0.6, PANEL_Y, 0]}>
         <group ref={panel} visible={false}>
-          <mesh position={[0, -0.12, -0.03]}>
-            <planeGeometry args={[PW + 0.34, PH + 1.04]} />
+          <mesh ref={backdrop} position={[0, -0.12, -0.03]} scale-y={PH + 1.04}>
+            <planeGeometry args={[PW + 0.34, 1]} />
             <meshBasicMaterial color="#06131c" transparent opacity={0.72} depthWrite={false} />
           </mesh>
           <mesh position={[0, 0.1, 0]}>
@@ -161,10 +184,10 @@ function Station({ spot, activeRef }) {
           <Text position={[PW / 2, 0.1 + PH / 2 + 0.2, 0.02]} fontSize={0.1} letterSpacing={0.3} color={HOLO} anchorX="right" anchorY="middle">
             {spot.year}
           </Text>
-          <Text position={[-PW / 2, 0.1 - PH / 2 - 0.12, 0.02]} fontSize={0.17} maxWidth={PW} color="#ffffff" anchorX="left" anchorY="top" fontWeight={700}>
+          <Text position={[-PW / 2, TEXT_TOP, 0.02]} fontSize={0.17} maxWidth={PW} color="#ffffff" anchorX="left" anchorY="top" fontWeight={700} onSync={onTitleSync}>
             {spot.title}
           </Text>
-          <Text position={[-PW / 2, 0.1 - PH / 2 - 0.38, 0.02]} fontSize={0.095} maxWidth={PW} lineHeight={1.4} color="#bfe9f5" anchorX="left" anchorY="top">
+          <Text ref={body} position={[-PW / 2, TEXT_TOP - 0.28, 0.02]} fontSize={0.095} maxWidth={PW} lineHeight={1.4} color="#bfe9f5" anchorX="left" anchorY="top" onSync={onBodySync}>
             {spot.text}
           </Text>
         </group>

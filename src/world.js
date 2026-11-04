@@ -247,28 +247,50 @@ export const roomObstacles = {
     { x: 6.72, z: R + 4.8, hw: 0.25, hd: 1.2, h: 2.4 }, { x: 2.8, z: R + 2, r: 0.35, h: 1.4 }, { x: -5.9, z: R - 6.9, r: 0.5, h: 1.6 }, { x: -5.9, z: R + 5.5, r: 0.4, h: 1.2 }],
 }
 
-// placeholder kalau src foto kosong
+// kartu pengganti kalau src foto kosong: tahun besar + judul.
+// soon = tanggal acara yang belum terjadi → kartu "Coming soon"
 const placeholderCache = new Map()
 export function photoSrc(item) {
   if (item.src) return item.src
   if (placeholderCache.has(item.index)) return placeholderCache.get(item.index)
+  const W = 1200
+  const H = 800
   const c = document.createElement('canvas')
-  c.width = 640
-  c.height = 440
+  c.width = W
+  c.height = H
   const g = c.getContext('2d')
-  const hue = (item.index * 47 + 320) % 360
-  const grad = g.createLinearGradient(0, 0, 640, 440)
-  grad.addColorStop(0, `hsl(${hue}, 45%, 58%)`)
-  grad.addColorStop(1, `hsl(${(hue + 40) % 360}, 50%, 26%)`)
+  const hue = item.soon ? 330 : (item.index * 47 + 200) % 360
+  const grad = g.createLinearGradient(0, 0, W, H)
+  grad.addColorStop(0, `hsl(${hue}, 45%, 16%)`)
+  grad.addColorStop(1, `hsl(${(hue + 50) % 360}, 55%, 7%)`)
   g.fillStyle = grad
-  g.fillRect(0, 0, 640, 440)
-  g.fillStyle = 'rgba(255,255,255,0.88)'
-  g.font = '600 34px Inter, sans-serif'
+  g.fillRect(0, 0, W, H)
+  // bintik-bintik kelopak sakura
+  const r = rng(item.index + 7)
+  for (let i = 0; i < 70; i++) {
+    g.fillStyle = `rgba(255, 170, 205, ${0.05 + r() * 0.18})`
+    g.beginPath()
+    g.ellipse(r() * W, r() * H, 4 + r() * 9, 2 + r() * 4, r() * Math.PI, 0, Math.PI * 2)
+    g.fill()
+  }
+  g.strokeStyle = 'rgba(255, 255, 255, 0.18)'
+  g.lineWidth = 2
+  g.strokeRect(40, 40, W - 80, H - 80)
+  const accent = item.soon ? '#ff7eb6' : '#7fe8ff'
   g.textAlign = 'center'
-  g.fillText(`Photo ${item.index + 1}`, 320, 210)
-  g.font = '400 20px Inter, sans-serif'
-  g.fillText('replace it in src/data.js', 320, 250)
-  const url = c.toDataURL('image/jpeg', 0.85)
+  g.fillStyle = accent
+  g.font = '600 26px "JetBrains Mono", monospace'
+  g.fillText(item.soon ? 'C O M I N G   S O O N' : `C H A P T E R   ${String(item.index + 1).padStart(2, '0')}`, W / 2, 200)
+  g.fillStyle = '#ffffff'
+  g.font = '800 150px Inter, Arial, sans-serif'
+  g.fillText(item.soon ?? item.year, W / 2, 400, W - 160)
+  g.fillStyle = 'rgba(255, 255, 255, 0.85)'
+  g.font = '600 46px Inter, Arial, sans-serif'
+  g.fillText(item.title, W / 2, 500, W - 160)
+  g.fillStyle = 'rgba(255, 255, 255, 0.45)'
+  g.font = '500 24px "JetBrains Mono", monospace'
+  g.fillText(item.soon ? 'save the date' : 'photo coming soon', W / 2, 640)
+  const url = c.toDataURL('image/jpeg', 0.88)
   placeholderCache.set(item.index, url)
   return url
 }

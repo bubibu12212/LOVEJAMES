@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGLTF, useAnimations, useKeyboardControls } from '@react-three/drei'
 import * as THREE from 'three'
-import { camState, PLAYER_START, groundY, pushOut, DRACO } from '../world'
+import { camState, PLAYER_START, groundY, pushOut, DRACO, touchMove } from '../world'
 
 const SPEED = 3.2
 const RUN_SPEED = 6
@@ -99,15 +99,18 @@ export default function Character({ playerRef, enabled, bounds, obstacles }) {
   useFrame((state, dt) => {
     const g = playerRef.current
     const k = getKeys()
-    dir.set(Number(k.right) - Number(k.left), 0, Number(k.back) - Number(k.forward))
-    const moving = enabled && dir.lengthSq() > 0
-    const running = moving && k.run
+    // keyboard + joystick HP; joystick didorong sedikit = jalan pelan, sampai pinggir = lari
+    const stick = Math.hypot(touchMove.x, touchMove.y)
+    dir.set(Number(k.right) - Number(k.left) + touchMove.x, 0, Number(k.back) - Number(k.forward) + touchMove.y)
+    const push = Math.min(1, dir.length())
+    const moving = enabled && push > 0.15
+    const running = moving && (k.run || stick > 0.9)
     let target = null
 
     if (moving) {
       // arah jalan mengikuti arah kamera
       dir.normalize().applyAxisAngle(UP, camState.yaw)
-      g.position.addScaledVector(dir, (running ? RUN_SPEED : SPEED) * dt)
+      g.position.addScaledVector(dir, (running ? RUN_SPEED : SPEED * Math.max(push, 0.5)) * dt)
       g.position.x = THREE.MathUtils.clamp(g.position.x, bounds.minX, bounds.maxX)
       g.position.z = THREE.MathUtils.clamp(g.position.z, bounds.minZ, bounds.maxZ)
 

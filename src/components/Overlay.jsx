@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useProgress } from '@react-three/drei'
 import { profile } from '../data'
-import { photoSrc, buildingSpots } from '../world'
+import { photoSrc, buildingSpots, touchMove } from '../world'
 
 function Loader() {
   const { progress, active } = useProgress()
@@ -241,6 +241,49 @@ export function ScrollIntro({ canEnter, onEnter }) {
   )
 }
 
+// layar sentuh (HP/tablet): tidak ada keyboard, jadi tampilkan joystick
+const isTouch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
+
+// joystick virtual untuk HP: geser bulatan untuk jalan, sampai pinggir = lari
+function Joystick() {
+  const base = useRef()
+  const knob = useRef()
+  const active = useRef(null)
+  const R = 46 // jarak maksimal bulatan dari tengah (px)
+
+  const set = (dx, dy) => {
+    const d = Math.hypot(dx, dy)
+    if (d > R) { dx = (dx / d) * R; dy = (dy / d) * R }
+    knob.current.style.transform = `translate(${dx}px, ${dy}px)`
+    touchMove.x = dx / R
+    touchMove.y = dy / R
+    base.current.classList.toggle('run', Math.hypot(dx, dy) / R > 0.9)
+  }
+  const fromEvent = (e) => {
+    const r = base.current.getBoundingClientRect()
+    set(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2))
+  }
+  const down = (e) => {
+    active.current = e.pointerId
+    base.current.setPointerCapture(e.pointerId)
+    fromEvent(e)
+  }
+  const move = (e) => { if (e.pointerId === active.current) fromEvent(e) }
+  const up = (e) => {
+    if (e.pointerId !== active.current) return
+    active.current = null
+    set(0, 0)
+  }
+  // lepas joystick saat keluar mode jalan-jalan
+  useEffect(() => () => { touchMove.x = 0; touchMove.y = 0 }, [])
+
+  return (
+    <div className="joystick" ref={base} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
+      <span className="joystick-knob" ref={knob} />
+    </div>
+  )
+}
+
 function FocusCard({ focus, onPhoto, onOpenProject, onOpenContact }) {
   if (!focus) return null
   const { type, data } = focus
@@ -251,7 +294,7 @@ function FocusCard({ focus, onPhoto, onOpenProject, onOpenContact }) {
         <span>
           <small className="mono">My journey · {data.year}</small>
           <b>{data.title}</b>
-          <small>Click to view the photo</small>
+          <small>{isTouch ? 'Tap' : 'Click'} to view the photo</small>
         </span>
       </button>
     )
@@ -267,7 +310,7 @@ function FocusCard({ focus, onPhoto, onOpenProject, onOpenContact }) {
   if (type === 'screen') {
     return (
       <button className="btn primary open-link" onClick={onOpenProject}>
-        Open {data.title} <kbd>E</kbd>
+        Open {data.title} {!isTouch && <kbd>E</kbd>}
       </button>
     )
   }
@@ -310,20 +353,31 @@ export default function Overlay({ mode, world, focus, modal, fade, canEnter, onE
             <span>{project ? `${project.category} · inside` : 'The Garden · 庭園'}</span>
           </div>
 
-          <button className="btn ghost hud-exit glass" onClick={onExit}>{project ? 'Leave building' : 'Exit'} <kbd>Esc</kbd></button>
+          <button className="btn ghost hud-exit glass" onClick={onExit}>{project ? 'Leave building' : 'Exit'} {!isTouch && <kbd>Esc</kbd>}</button>
 
-          <div className="hud-keys glass">
-            <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk</span>
-            <span><kbd>Shift</kbd> run</span>
-            <span><kbd>Drag</kbd> look around</span>
-            <span><kbd>Scroll</kbd> zoom</span>
-          </div>
+          {isTouch ? (
+            <>
+              <Joystick />
+              <div className="hud-keys hud-touch glass">
+                <span><kbd>Joystick</kbd> walk · edge = run</span>
+                <span><kbd>Swipe</kbd> look</span>
+                <span><kbd>Pinch</kbd> zoom</span>
+              </div>
+            </>
+          ) : (
+            <div className="hud-keys glass">
+              <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk</span>
+              <span><kbd>Shift</kbd> run</span>
+              <span><kbd>Drag</kbd> look around</span>
+              <span><kbd>Scroll</kbd> zoom</span>
+            </div>
+          )}
 
           {!project && !focus && (
             <div className="toast glass">Follow the stone path: my journey comes first, then step into a building to explore a project. Say hi at the end!</div>
           )}
           {project && focus?.type === 'room' && (
-            <div className="toast glass">Walk to the glowing screen and click it to open the project. The frames show the tools I used.</div>
+            <div className="toast glass">Walk to the glowing screen and {isTouch ? 'tap' : 'click'} it to open the project. The frames show the tools I used.</div>
           )}
 
           <FocusCard focus={focus} onPhoto={setPhoto} onOpenProject={onOpenProject} onOpenContact={onOpenContact} />

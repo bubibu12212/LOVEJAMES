@@ -74,36 +74,58 @@ function NightSky() {
   )
 }
 
-// drag mouse / jari untuk memutar kamera, scroll untuk zoom
+// drag mouse / geser jari untuk memutar kamera, scroll / cubit (2 jari) untuk zoom.
+// Tiap jari dilacak sendiri (pointerId), jadi jari di joystick tidak ikut memutar kamera.
 function useOrbitControls(enabled) {
   const { gl } = useThree()
   useEffect(() => {
     if (!enabled) return
     const el = gl.domElement
     const body = document.body.classList
-    let drag = null
-    const down = (e) => { drag = { x: e.clientX, y: e.clientY }; body.add('dragging') }
-    const move = (e) => {
-      if (!drag) return
-      camState.yaw -= (e.clientX - drag.x) * 0.006
-      camState.pitch = THREE.MathUtils.clamp(camState.pitch + (e.clientY - drag.y) * 0.004, 0.08, 1.25)
-      drag = { x: e.clientX, y: e.clientY }
+    const pts = new Map() // pointerId → posisi terakhir (hanya yang mulai di kanvas)
+    let pinch = 0
+    const zoom = (d) => { camState.dist = THREE.MathUtils.clamp(camState.dist + d, 3.5, 14) }
+    const spread = () => { const [a, b] = [...pts.values()]; return Math.hypot(a.x - b.x, a.y - b.y) }
+    const down = (e) => {
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY })
+      if (pts.size === 2) pinch = spread()
+      body.add('dragging')
     }
-    const up = () => { drag = null; body.remove('dragging') }
+    const move = (e) => {
+      const p = pts.get(e.pointerId)
+      if (!p) return
+      const dx = e.clientX - p.x
+      const dy = e.clientY - p.y
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY })
+      if (pts.size === 2) {
+        const s = spread()
+        zoom((pinch - s) * 0.03)
+        pinch = s
+        return
+      }
+      camState.yaw -= dx * 0.006
+      camState.pitch = THREE.MathUtils.clamp(camState.pitch + dy * 0.004, 0.08, 1.25)
+    }
+    const up = (e) => {
+      pts.delete(e.pointerId)
+      if (!pts.size) body.remove('dragging')
+    }
     const wheel = (e) => {
       e.preventDefault()
-      camState.dist = THREE.MathUtils.clamp(camState.dist + e.deltaY * 0.006, 3.5, 14)
+      zoom(e.deltaY * 0.006)
     }
     body.add('can-drag')
     el.addEventListener('pointerdown', down)
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
+    window.addEventListener('pointercancel', up)
     el.addEventListener('wheel', wheel, { passive: false })
     return () => {
       body.remove('can-drag', 'dragging')
       el.removeEventListener('pointerdown', down)
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
+      window.removeEventListener('pointercancel', up)
       el.removeEventListener('wheel', wheel)
     }
   }, [enabled, gl])

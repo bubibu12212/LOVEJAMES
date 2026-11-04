@@ -426,6 +426,24 @@ body.dragging .stage canvas { cursor: grabbing; }
 @media (max-width: 1000px) {
   .photo-card, .open-link, .contact-card { bottom: 96px; }
 }
+
+/* joystick layar sentuh (HP/tablet) */
+.joystick {
+  position: absolute; left: 22px; bottom: 22px; width: 124px; height: 124px; border-radius: 50%;
+  display: grid; place-items: center; pointer-events: auto; touch-action: none; user-select: none; -webkit-user-select: none;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.04) 0 40%, rgba(255, 255, 255, 0.1) 41% 100%);
+  border: 1px solid rgba(241, 235, 225, 0.28); backdrop-filter: blur(6px); transition: border-color 0.2s, box-shadow 0.2s;
+}
+.joystick.run { border-color: var(--red-2); box-shadow: 0 0 0 4px rgba(224, 38, 27, 0.25); }
+.joystick-knob {
+  width: 54px; height: 54px; border-radius: 50%; pointer-events: none;
+  background: rgba(241, 235, 225, 0.88); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+.joystick.run .joystick-knob { background: var(--red-2); }
+.hud-touch { left: 162px; bottom: 22px; max-width: calc(100% - 180px); font-size: 11px; gap: 4px 10px; }
+@media (pointer: coarse) {
+  .photo-card, .open-link, .contact-card { bottom: 166px; }
+}
 @media (max-width: 520px) {
   .nav-links { gap: 12px; }
   .nav-links a { font-size: 12px; }

@@ -32,12 +32,12 @@ export const profile = {
 export const journey = [
   { year: '2023', title: 'First line of code', text: 'Started my Informatics degree and wrote my very first program .', src: '/gallery/preuni.jpeg' },
   { year: '2021', title: 'Campus organization', text: 'Joined the Informatics Student Association, contributing to the External Relations Division and collaborating with fellow members.', src: '/gallery/puma1.jpeg' },
-  { year: '2021', title: 'Project Manager Comparative Study', text: 'Built and shipped my first website for a real client.', src: '' },
-  { year: '2022', title: 'Event Organizer Cultural Festival', text: 'Spent 24 hours building a prototype with friends.', src: '' },
-  { year: '2023', title: 'Campus organization', text: 'Worked with a product team on a production app.', src: '' },
-  { year: '2023', title: 'Internship at PT Denso Indonesia', text: 'Helped juniors learn programming fundamentals.', src: '' },
-  { year: '2024', title: 'Final thesis', text: 'Researched and built my final thesis project.', src: '' },
-  { year: '2025', title: 'Graduation day', text: 'Graduated — and ready for what comes next.', src: '' },
+  { year: '2021', title: 'Project Manager Comparative Study', text: 'Built and shipped my first website for a real client.', src: '/gallery/tecno.jpeg' },
+  { year: '2022', title: 'Event Organizer Cultural Festival', text: 'Spent 24 hours building a prototype with friends.', src: '/gallery/culfest.jpeg' },
+  { year: '2023', title: 'Campus organization', text: 'Worked with a product team on a production app.', src: '/gallery/product_app.jpeg' },
+  { year: '2023', title: 'Internship at PT Denso Indonesia', text: 'Helped juniors learn programming fundamentals.', src: '/gallery/internship.jpeg' },
+  { year: '2024', title: 'Final thesis', text: 'Researched and built my final thesis project.', src: '/gallery/final_thesis.jpeg' },
+  { year: '2025', title: 'Graduation day', text: 'Graduated — and ready for what comes next.', src: '/gallery/graduation.jpeg' },
 ] 
 
 // ===================== PROJECT (gedung yang bisa dimasuki) =====================

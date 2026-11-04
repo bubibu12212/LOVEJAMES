@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useGLTF } from '@react-three/drei'
 import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
-import { applyWind, rng } from '../world'
+import { applyWind, rng, DRACO } from '../world'
 
 const MODEL = '/models/sakura_tree.glb'
 const TREE_H = 7.2 // tinggi pohon (skala 1)
@@ -13,7 +13,7 @@ const dummy = new THREE.Object3D()
 // Model aslinya terdiri dari ratusan mesh kecil. Digabung per material supaya
 // semua pohon cukup digambar dengan 2 draw call (instancing).
 function useMergedTree() {
-  const { scene } = useGLTF(MODEL)
+  const { scene } = useGLTF(MODEL, DRACO)
   return useMemo(() => {
     scene.updateMatrixWorld(true)
     const groups = new Map()
@@ -135,4 +135,4 @@ export function Petals({ followRef }) {
   )
 }
 
-useGLTF.preload(MODEL)
+useGLTF.preload(MODEL, DRACO)

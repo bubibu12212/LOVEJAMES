@@ -16,7 +16,7 @@ export const profile = {
   ],
   skills: ['JavaScript', 'Python', 'React', 'Node.js', 'SQL', 'Git', 'Figma', 'Three.js'],
   // Foto untuk bagian About: taruh file di public/photo.jpg (kosongkan '' kalau belum ada)
-  photo: '/gallery/ica.jpeg',
+  photo: '/gallery/ica.webp',
   // true = tampilkan animasi Three.js buatanmu (src/components/About3D.jsx) di bagian About, menggantikan foto
   useAbout3D: false,
   contacts: [
@@ -28,32 +28,32 @@ export const profile = {
 
 // ===================== CERITA PERJALANAN (di taman) =====================
 // Foto-foto yang muncul (pop-up) di sepanjang jalan taman, urut dari depan ke belakang. Maksimal 8.
-// Taruh foto di public/gallery/journey/ (ukuran 3:2, mis. 1200x800 supaya semua bingkai rapi),
-// lalu isi src seperti '/gallery/journey/03-unpad.jpg'. Kalau kosong, muncul kartu "photo coming soon".
+// Taruh foto di public/gallery/journey/ (ukuran 3:2, mis. 1200x800, format .webp supaya ringan),
+// lalu isi src seperti '/gallery/journey/03-unpad.webp'. Kalau kosong, muncul kartu "photo coming soon".
 // soon = tanggal untuk acara yang belum terjadi (kartu "Coming soon").
 // Judul maksimal ±25 huruf supaya muat satu baris di panel.
 export const journey = [
   { year: '2023', title: 'Day One at Pre-Uni',
     text: 'New blazer, new friends, new city of code. Pre-University at President University was where my Computer Science story officially began.',
-    src: '/gallery/journey/01-preuni.jpg' },
+    src: '/gallery/journey/01-preuni.webp' },
   { year: '2023', title: 'Hello, PUMA Informatics',
     text: 'Joined the Informatics Student Association in External Relations: the bridge between our campus and other organizations and companies.',
-    src: '/gallery/journey/02-external.jpg' },
+    src: '/gallery/journey/02-external.webp' },
   { year: '2024', title: 'PM · Comparative Study',
     text: 'Led PUMA Informatics\' comparative study visit to Universitas Padjadjaran (UNPAD) as Project Manager, from first plan to the big day.',
-    src: '/gallery/journey/03-unpad.jpg' },
+    src: '/gallery/journey/03-unpad.webp' },
   { year: '2024', title: 'Vice Head, Technopreneur',
     text: 'Moved to the Technopreneur Division as Vice Head, keeping the books in order: cash records, receivables and installment tracking.',
-    src: '/gallery/journey/04-technopreneur.jpg' },
+    src: '/gallery/journey/04-technopreneur.webp' },
   { year: '2024', title: 'Event Organizer · Culfest',
     text: 'Part of the organizing team behind Culfest, the BEM campus festival that brought together 1,000+ participants.',
-    src: '/gallery/journey/05-culfest.jpg' },
+    src: '/gallery/journey/05-culfest.webp' },
   { year: '2025', title: 'Intern at DENSO Indonesia',
     text: 'A year in the procurement team, turning paper into apps: an E-PO web app, a Power Apps PR system and automation scripts.',
-    src: '/gallery/journey/06-denso.jpg' },
+    src: '/gallery/journey/06-denso.webp' },
   { year: '2026', title: 'Thesis Defended',
     text: 'Built DYX, an AI chatbot that classifies goods into Indonesian HS Codes, then defended it and walked out with flowers in hand.',
-    src: '/gallery/journey/07-thesis.jpg' },
+    src: '/gallery/journey/07-thesis.webp' },
   { year: '2026', title: 'Graduation Day', soon: '13 . 12 . 2026',
     text: 'Coming soon on 13 December 2026: the last page of this chapter, and the first page of the next one.',
     src: '' },
@@ -66,10 +66,10 @@ export const journey = [
 //   logonya diambil dari public/logos/ (daftar nama → file ada di LOGOS, src/screens.js); tanpa logo = inisial huruf
 // details = paragraf pembuka di jendela project (muncul saat layar/TV di dalam ruangan diklik)
 // features = daftar fitur utama (poin-poin di bawah paragraf)
-// images = foto/screenshot project, contoh ['/projects/web1.jpg'] (taruh di public/projects/)
+// images = foto/screenshot project, contoh ['/projects/web1.webp'] (taruh di public/projects/)
 // link = tombol "Open project" (kosongkan = tombolnya tidak muncul)
 // Urutan = urutan gedung di taman: kiri-kanan bergantian dari depan ke belakang.
-const shots = (dir, n, pad = 1) => Array.from({ length: n }, (_, i) => `/projects/${dir}/${String(i + 1).padStart(pad, '0')}.jpg`)
+const shots = (dir, n, pad = 1) => Array.from({ length: n }, (_, i) => `/projects/${dir}/${String(i + 1).padStart(pad, '0')}.webp`)
 
 export const stations = [
   { id: 'hscode', interior: 'studio', category: 'Final Thesis · AI', title: 'DYX — HS Code AI Chatbot',

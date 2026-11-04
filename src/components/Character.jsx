@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGLTF, useAnimations, useKeyboardControls } from '@react-three/drei'
 import * as THREE from 'three'
-import { camState, PLAYER_START, groundY, pushOut } from '../world'
+import { camState, PLAYER_START, groundY, pushOut, DRACO } from '../world'
 
 const SPEED = 3.2
 const RUN_SPEED = 6
@@ -40,7 +40,7 @@ function hipY(scene, sockName) {
 
 // bounds = {minX, maxX, minZ, maxZ} area boleh jalan, obstacles = lingkaran tabrakan dunia aktif
 export default function Character({ playerRef, enabled, bounds, obstacles }) {
-  const { scene, animations } = useGLTF('/models/icafixed.glb')
+  const { scene, animations } = useGLTF('/models/icafixed.glb', DRACO)
   const model = useRef()
   const limbs = useRef(null)
   const walk = useRef({ phase: 0, amount: 0 })
@@ -154,4 +154,4 @@ export default function Character({ playerRef, enabled, bounds, obstacles }) {
   )
 }
 
-useGLTF.preload('/models/icafixed.glb')
+useGLTF.preload('/models/icafixed.glb', DRACO)

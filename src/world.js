@@ -1,6 +1,9 @@
 import * as THREE from 'three'
 import { stations, journey } from './data'
 
+// model 3D dikompres dengan Draco; dekodernya disimpan sendiri di public/draco/ (tidak bergantung CDN)
+export const DRACO = '/draco/'
+
 // kamera orbit: yaw = putaran kiri/kanan, pitch = sudut atas/bawah, dist = jarak (zoom)
 export const camState = { yaw: 0, pitch: 0.38, dist: 7 }
 

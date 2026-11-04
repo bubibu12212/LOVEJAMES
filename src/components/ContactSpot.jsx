@@ -4,7 +4,7 @@ import { useGLTF, useAnimations, Text, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import { B } from './Props'
 import { profile } from '../data'
-import { CONTACT } from '../world'
+import { CONTACT, DRACO } from '../world'
 
 const PINK = '#ff7eb6'
 const CYAN = '#7fe8ff'
@@ -13,7 +13,7 @@ const BH = 2.6
 
 // karakter kamu berdiri di ujung jalan (salinan model yang sama dengan pemain)
 function Host({ activeRef }) {
-  const { scene, animations } = useGLTF('/models/icafixed.glb')
+  const { scene, animations } = useGLTF('/models/icafixed.glb', DRACO)
   const model = useMemo(() => scene.clone(true), [scene])
   const ref = useRef()
   const { actions } = useAnimations(animations, ref)

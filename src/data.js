@@ -16,7 +16,7 @@ export const profile = {
   ],
   skills: ['JavaScript', 'Python', 'React', 'Node.js', 'SQL', 'Git', 'Figma', 'Three.js'],
   // Foto untuk bagian About: taruh file di public/photo.jpg (kosongkan '' kalau belum ada)
-  photo: '/gallery/ica.jpeg',
+  photo: '/gallery/journey/ica.jpeg',
   // true = tampilkan animasi Three.js buatanmu (src/components/About3D.jsx) di bagian About, menggantikan foto
   useAbout3D: false,
   contacts: [
@@ -41,13 +41,13 @@ export const journey = [
     src: '/gallery/journey/02-external.jpg' },
   { year: '2024', title: 'PM · Comparative Study',
     text: 'Led PUMA Informatics\' comparative study visit to Universitas Padjadjaran (UNPAD) as Project Manager, from first plan to the big day.',
-    src: '/gallery/journey/03-unpad.jpg' },
+    src: '/gallery/journey/pm.jpeg' },
   { year: '2024', title: 'Vice Head, Technopreneur',
     text: 'Moved to the Technopreneur Division as Vice Head, keeping the books in order: cash records, receivables and installment tracking.',
-    src: '/gallery/journey/04-technopreneur.jpg' },
+    src: '/gallery/journey/tecno.jpeg' },
   { year: '2024', title: 'Event Organizer · Culfest',
     text: 'Part of the organizing team behind Culfest, the BEM campus festival that brought together 1,000+ participants.',
-    src: '/gallery/journey/05-culfest.jpg' },
+    src: '/gallery/journey/culfest.jpeg' },
   { year: '2025', title: 'Intern at DENSO Indonesia',
     text: 'A year in the procurement team, turning paper into apps: an E-PO web app, a Power Apps PR system and automation scripts.',
     src: '/gallery/journey/06-denso.jpg' },
